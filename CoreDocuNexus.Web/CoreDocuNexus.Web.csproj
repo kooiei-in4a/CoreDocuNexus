@@ -13,4 +13,9 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8" PrivateAssets="all" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\CoreDocuNexus.Contracts\CoreDocuNexus.Contracts.csproj" />
+	  <ProjectReference Include="..\CoreDocuNexus.Shared\CoreDocuNexus.Shared.csproj" />
+	</ItemGroup>
+
 </Project>

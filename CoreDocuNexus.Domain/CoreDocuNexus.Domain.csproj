@@ -8,4 +8,9 @@
 		<AssemblyName>jp.in4a.CoreDocuNexus.Domain</AssemblyName>
 	</PropertyGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\CoreDocuNexus.Domain.Shared\CoreDocuNexus.Domain.Shared.csproj" />
+	  <ProjectReference Include="..\CoreDocuNexus.Shared\CoreDocuNexus.Shared.csproj" />
+	</ItemGroup>
+
 </Project>

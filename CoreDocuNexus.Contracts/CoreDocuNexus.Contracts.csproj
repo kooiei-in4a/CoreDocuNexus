@@ -8,4 +8,8 @@
 		<AssemblyName>jp.in4a.CoreDocuNexus.Contracts</AssemblyName>
 	</PropertyGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\CoreDocuNexus.Shared\CoreDocuNexus.Shared.csproj" />
+	</ItemGroup>
+
 </Project>
