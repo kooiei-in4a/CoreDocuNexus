@@ -1,0 +1,49 @@
+﻿// In CoreDocuNexus.Web/Pages/TestApi.razor
+@page "/test-api"
+@using jp.in4a.CoreDocuNexus.Contracts.Greetings
+@inject HttpClient Http
+
+<h3>API Connectivity Test</h3>
+
+<button class="btn btn-primary" @onclick="CallApi">Call API</button>
+
+@if (_isLoading)
+{
+    <p><em>Loading...</em></p>
+}
+else if (_response != null)
+{
+    <p><strong>Message:</strong> @_response.Message</p>
+    <p><strong>Timestamp:</strong> @_response.Timestamp.ToLocalTime()</p>
+}
+else if (!string.IsNullOrEmpty(_errorMessage))
+{
+    <p style="color: red;">@_errorMessage</p>
+}
+
+@code {
+    private GreetingResponse _response;
+    private string _errorMessage;
+    private bool _isLoading = false;
+
+    private async Task CallApi()
+    {
+        _isLoading = true;
+        _errorMessage = null;
+        _response = null;
+
+        try
+        {
+            // ここでContractsプロジェクトを参照し、型安全にデシリアライズする
+            _response = await Http.GetFromJsonAsync<GreetingResponse>("/api/greeting");
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = "Failed to call API: " + ex.Message;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}
