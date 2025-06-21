@@ -1,5 +1,5 @@
 ﻿// In CoreDocuNexus.Web/Pages/TestApi.razor
-@page "/"
+@page "/test-api"
 @using jp.in4a.CoreDocuNexus.Contracts.Greetings
 @inject HttpClient Http
 
@@ -23,15 +23,15 @@ else if (!string.IsNullOrEmpty(_errorMessage))
 }
 
 @code {
-    private GreetingResponse _response;
-    private string _errorMessage;
+    private GreetingResponse? _response;
+    private string? _errorMessage;
     private bool _isLoading = false;
     private string url = string.Empty;
 
     private async Task CallApi()
     {
         _isLoading = true;
-        _errorMessage = null;
+        _errorMessage = string.Empty;
         _response = null;
 
         try
