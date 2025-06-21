@@ -35,7 +35,7 @@ else if (!string.IsNullOrEmpty(_errorMessage))
         try
         {
             // ここでContractsプロジェクトを参照し、型安全にデシリアライズする
-            _response = await Http.GetFromJsonAsync<GreetingResponse>("/api/greeting");
+            _response = await Http.GetFromJsonAsync<GreetingResponse>("https://coredocunexusapitesting.azurewebsites.net/api/Greeting");
         }
         catch (Exception ex)
         {

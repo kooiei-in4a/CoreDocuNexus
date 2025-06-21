@@ -18,17 +18,17 @@ public class Greeting
     [Function("Greeting")]
     public IActionResult Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequest req)
     {
-        _logger.LogInformation("C# HTTP trigger function processed a request.");
-        return new OkObjectResult($"Hello from the API! ({typeof(Greeting).Name}) The time is {DateTime.UtcNow:O}");
-
         //_logger.LogInformation("C# HTTP trigger function processed a request.");
+        //return new OkObjectResult($"Hello from the API! ({typeof(Greeting).Name}) The time is {DateTime.UtcNow:O}");
 
-        //var response = new GreetingResponse
-        //{
-        //    Message = $"Hello from the API! ({typeof(GreetingApi).Name}) The time is {DateTime.UtcNow:O}",
-        //    Timestamp = DateTime.UtcNow
-        //};
+        _logger.LogInformation("C# HTTP trigger function processed a request.");
 
-        //return new OkObjectResult(response);
+        var response = new GreetingResponse
+        {
+            Message = $"Hello from the API! ({typeof(Greeting).Name}) The time is {DateTime.UtcNow:O}",
+            Timestamp = DateTime.UtcNow
+        };
+
+        return new OkObjectResult(response);
     }
 }
