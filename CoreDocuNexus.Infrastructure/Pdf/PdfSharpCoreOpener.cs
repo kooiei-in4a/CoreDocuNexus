@@ -1,12 +1,6 @@
-﻿using Microsoft.VisualBasic;
-using PdfSharpCore.Pdf;
+﻿using PdfSharpCore.Pdf;
 using PdfSharpCore.Pdf.IO;
 using PdfSharpCore.Pdf.IO.enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 
 namespace jp.in4a.CoreDocuNexus.Infrastructure.Pdf
