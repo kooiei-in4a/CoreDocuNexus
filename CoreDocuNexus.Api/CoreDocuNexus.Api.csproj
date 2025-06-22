@@ -18,6 +18,7 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\CoreDocuNexus.Contracts\CoreDocuNexus.Contracts.csproj" />
+	  <ProjectReference Include="..\CoreDocuNexus.Features\CoreDocuNexus.Features.csproj" />
 	  <ProjectReference Include="..\CoreDocuNexus.Shared\CoreDocuNexus.Shared.csproj" />
 	</ItemGroup>
 </Project>
