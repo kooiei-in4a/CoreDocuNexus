@@ -17,7 +17,6 @@
 		<PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.2" />
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\CoreDocuNexus.Application\CoreDocuNexus.Application.csproj" />
 	  <ProjectReference Include="..\CoreDocuNexus.Contracts\CoreDocuNexus.Contracts.csproj" />
 	  <ProjectReference Include="..\CoreDocuNexus.Shared\CoreDocuNexus.Shared.csproj" />
 	</ItemGroup>
