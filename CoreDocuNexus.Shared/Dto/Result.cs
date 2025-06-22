@@ -9,7 +9,7 @@ namespace jp.in4a.CoreDocuNexus.Shared.Dto
     public class Result<T>
     {
         public bool IsSuccess { get; } = false;
-        public T? Value { get; }
+        public T Value { get; }
         public string Message { get; } = string.Empty;
 
         public int StatusCode { get; } = 0;
@@ -17,7 +17,7 @@ namespace jp.in4a.CoreDocuNexus.Shared.Dto
         private Result(bool isSuccess, T? value, string error,int statusCode)
         {
             IsSuccess = isSuccess;
-            Value = value;
+            Value = value ?? default!;
             Message = error;
             StatusCode = statusCode;
         }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using jp.in4a.CoreDocuNexus.Shared.Dto;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -34,5 +35,17 @@ namespace jp.in4a.CoreDocuNexus.Contracts.Http.AddPasswordToPdf
         /// エラー発生時には、その詳細が含まれます。
         /// </summary>
         public string Message { get; set; } = string.Empty;
+
+        public AddPasswordToPdfResponse(bool success, byte[] pdfFile, string message, int statusCode)
+        {
+            Success = success;
+            PdfFile = pdfFile ?? Array.Empty<byte>();
+            Message = message ?? string.Empty;
+            StatusCode = statusCode;
+        }
+
+        public static AddPasswordToPdfResponse GetSuccess(byte[] PdfFile) => new AddPasswordToPdfResponse(true, PdfFile, string.Empty, 0);
+
+        public static AddPasswordToPdfResponse GetFailure(string error, int code) => new AddPasswordToPdfResponse(false, Array.Empty<byte>(), error, code);
     }
 }

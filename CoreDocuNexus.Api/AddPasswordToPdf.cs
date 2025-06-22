@@ -33,24 +33,16 @@ public class AddPasswordToPdf
             if (request == null)
             {
                 _logger.LogError("無効なリクエストです。リクエストボディをデシリアライズできませんでした。");
-                return new BadRequestObjectResult(new AddPasswordToPdfResponse
-                {
-                    Success = false,
-                    StatusCode = 400,
-                    Message = "無効なリクエストです。リクエストボディをデシリアライズできませんでした。"
-                });
+                return new BadRequestObjectResult(AddPasswordToPdfResponse.GetFailure(
+                            "無効なリクエストです。リクエストボディをデシリアライズできませんでした。", 400));
             }
 
             // どちらかのパスワードが指定されていない場合はエラー
             if (string.IsNullOrWhiteSpace(request.UserPassword) && string.IsNullOrWhiteSpace(request.OwnerPassword))
             {
                 _logger.LogError("閲覧パスワードとオーナーパスワードの両方が空です。");
-                return new BadRequestObjectResult(new AddPasswordToPdfResponse
-                {
-                    Success = false,
-                    StatusCode = 400,
-                    Message = "閲覧パスワードとオーナーパスワードの両方が空です。"
-                });
+                return new BadRequestObjectResult(AddPasswordToPdfResponse.GetFailure(
+                            "閲覧パスワードとオーナーパスワードの両方が空です。", 400));
             }
 
 
@@ -58,12 +50,8 @@ public class AddPasswordToPdf
             if (request.PdfFile == null || request.PdfFile.Length == 0)
             {
                 _logger.LogError("PDFファイルは必須です。");
-                return new BadRequestObjectResult(new AddPasswordToPdfResponse
-                {
-                    Success = false,
-                    StatusCode = 400,
-                    Message = "PDFファイルは必須です。"
-                });
+                return new BadRequestObjectResult(AddPasswordToPdfResponse.GetFailure(
+                            "PDFファイルは必須です。", 400));
             }
 
             // PDFパスワード追加処理
@@ -72,24 +60,12 @@ public class AddPasswordToPdf
             if (!result.IsSuccess)
             {
                 _logger.LogInformation($"AddPasswordToPdf function fail.{result.Message}");
-                return new BadRequestObjectResult(new AddPasswordToPdfResponse
-                {
-                    PdfFile = result.Value ?? new byte[0],
-                    Success = false,
-                    StatusCode = result.StatusCode,
-                    Message = result.Message
-                });
+                return new BadRequestObjectResult(AddPasswordToPdfResponse.GetFailure(result.Message, result.StatusCode));
             }
 
 
             // 現在はリクエストのPDFファイルをそのまま返す
-            var response = new AddPasswordToPdfResponse
-            {
-                PdfFile = request.PdfFile, // ダミー: 実際にはパスワード保護されたPDFを返す
-                Success = true,
-                StatusCode = 0,
-                Message = "PDFにパスワードが正常に追加されました。"
-            };
+            var response = AddPasswordToPdfResponse.GetSuccess(result.Value);
 
             _logger.LogInformation("AddPasswordToPdf function completed successfully.");
             return new OkObjectResult(response);
@@ -97,12 +73,10 @@ public class AddPasswordToPdf
         catch (JsonException ex)
         {
             _logger.LogError(ex, "JSON deserialization error occurred.");
-            return new BadRequestObjectResult(new AddPasswordToPdfResponse
-            {
-                Success = false,
-                StatusCode = 400,
-                Message = "リクエストボディのJSON形式が無効です。"
-            });
+            return new BadRequestObjectResult(
+                               AddPasswordToPdfResponse.GetFailure("リクエストボディのJSON形式が無効です。", 400)
+                           );
+
         }
         catch (Exception ex)
         {
