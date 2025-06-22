@@ -1,7 +1,12 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Components.Forms
+@using System.Text.Json
+@using System.Text
+@using jp.in4a.CoreDocuNexus.Contracts.Http.AddPasswordToPdf
 @using MudBlazor
 @inject IJSRuntime JSRuntime
+@inject HttpClient Http
+@inject jp.in4a.CoreDocuNexus.Web.AppSettings.RootSettings Settings
 
 <PageTitle>PDFパスワード設定</PageTitle>
 
@@ -44,7 +49,7 @@
                     
                     <!-- ファイル選択時の制限事項表示 -->
                     <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
-                        ※ PDFファイルのみ、10MB以下のファイルを選択してください
+                        ※ PDFファイルのみ、@(Settings.MaxUploadFileSizeMB.ToString("0.#"))MB以下のファイルを選択してください
                     </MudText>
                 </MudItem>
             </MudGrid>
@@ -62,13 +67,7 @@
                 </MudGrid>
             }
 
-            <!-- エラーメッセージ表示 -->
-            @if (!string.IsNullOrEmpty(errorMessage))
-            {
-                <MudAlert Severity="Severity.Error" Class="mt-4">
-                    @errorMessage
-                </MudAlert>
-            }
+  
 
             <!-- パスワード設定フォーム -->
             @if (showPasswordForm)
@@ -88,7 +87,7 @@
                                                   Label="閲覧パスワード"
                                                   Variant="Variant.Outlined"
                                                   InputType="InputType.Password"
-                                                  HelperText="PDFを開く際に必要なパスワード（任意）"
+                                                  HelperText="PDFを開く際に必要なパスワード"
                                                   Class="mb-3" />
                                 </MudItem>
                                 
@@ -98,7 +97,7 @@
                                                   Label="編集パスワード"
                                                   Variant="Variant.Outlined"
                                                   InputType="InputType.Password"
-                                                  HelperText="PDF編集時に必要なパスワード（任意）"
+                                                  HelperText="PDF編集時に必要なパスワード"
                                                   Class="mb-3" />
                                 </MudItem>
                                 
@@ -129,6 +128,14 @@
                 </MudGrid>
             }
 
+            <!-- エラーメッセージ表示 -->
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <MudAlert Severity="Severity.Error" Class="mt-4">
+                    @errorMessage
+                </MudAlert>
+            }
+
             <!-- 成功メッセージ表示 -->
             @if (!string.IsNullOrEmpty(successMessage))
             {
@@ -146,7 +153,7 @@
 
             <MudList T="string">
                 <MudListItem Icon="@Icons.Material.Filled.FileUpload">
-                    PDFファイル（10MB以下）を選択してください
+                    PDFファイル（@(Settings.MaxUploadFileSizeMB.ToString("0.#"))MB以下）を選択してください
                 </MudListItem>
                 <MudListItem Icon="@Icons.Material.Filled.Security">
                     既にパスワードが設定されているPDFは処理できません
@@ -162,12 +169,12 @@
     </MudCard>
 </MudContainer>
 
-<MudLink Href="/test-api">
+@* <MudLink Href="/test-api">
     Test API
-</MudLink>
+</MudLink> *@
 
 @code {
-    private const long MaxSizeByte = 10485760;
+    private long MaxSizeByte = 1;
 
     // ファイル関連のプロパティ
     private IBrowserFile? selectedFile;
@@ -187,6 +194,12 @@
 
     // フォーム参照
     private MudForm? passwordForm;
+
+    protected override void OnInitialized()
+    {
+        // settingsから最大ファイルサイズを取得
+        MaxSizeByte = Convert.ToInt64(Settings.MaxUploadFileSize);
+    }
 
     /// <summary>
     /// ファイル選択時の処理
@@ -225,8 +238,7 @@
 
             selectedFile = file;
 
-            // 既存パスワードチェック処理を開始
-            await CheckExistingPassword();
+            showPasswordForm = true; // パスワードフォームを表示
         }
         catch (Exception ex)
         {
@@ -234,62 +246,6 @@
         }
     }
 
-    /// <summary>
-    /// 既存パスワードの確認処理
-    /// </summary>
-    private async Task CheckExistingPassword()
-    {
-        if (selectedFile == null) return;
-
-        try
-        {
-            // 処理中状態に設定
-            isProcessing = true;
-            processingMessage = "PDFファイルを確認しています...";
-            StateHasChanged();
-
-            // ファイルをバイト配列として読み込み
-            using var stream = selectedFile.OpenReadStream(maxAllowedSize: MaxSizeByte);
-            var buffer = new byte[selectedFile.Size];
-            await stream.ReadAsync(buffer);
-
-            // var result = PdfPasswordChecker.CheckPasswordProtection(buffer,"");
-
-            // // 既存パスワードチェック結果（実際の実装では上記のラップクラスの結果を使用）
-            // bool hasUserPassword = result.HasUserPassword; // 仮の実装
-            // bool hasOwnerPassword = result.HasOwnerPassword; // 仮の実装
-
-            bool hasUserPassword = false;
-            bool hasOwnerPassword = false;
-
-            Console.WriteLine($"PDFファイルのパスワードチェック結果: ユーザーパスワード={hasUserPassword}, オーナーパスワード={hasOwnerPassword}");
-            
-            if (hasUserPassword || hasOwnerPassword)
-            {
-                // 既にパスワードが設定されている場合
-                errorMessage = "選択されたPDFファイルには既にパスワードが設定されています。パスワードが設定されていないPDFファイルを選択してください。";
-                showPasswordForm = false;
-            }
-            else
-            {
-                // パスワードが設定されていない場合、フォームを表示
-                showPasswordForm = true;
-                successMessage = "PDFファイルの確認が完了しました。パスワードを設定してください。";
-            }
-        }
-        catch (Exception ex)
-        {
-            errorMessage = $"PDFファイルの確認中にエラーが発生しました: {ex.Message}";
-            showPasswordForm = false;
-        }
-        finally
-        {
-            // 処理中状態を解除
-            isProcessing = false;
-            processingMessage = string.Empty;
-            StateHasChanged();
-        }
-    }
 
     /// <summary>
     /// パスワード設定とダウンロード処理
@@ -297,7 +253,7 @@
     private async Task SetPasswordAndDownload()
     {
         if (selectedFile == null || !CanSetPassword()) return;
-        
+
         try
         {
             // 処理中状態に設定
@@ -305,13 +261,65 @@
             processingMessage = "パスワードを設定しています...";
             ClearMessages();
             StateHasChanged();
-            
+
             // ファイルをバイト配列として読み込み
             using var stream = selectedFile.OpenReadStream(maxAllowedSize: MaxSizeByte);
             var buffer = new byte[selectedFile.Size];
             await stream.ReadAsync(buffer);
-            
-            //PdfPermissionsFlags permissions
+
+            // リクエスト作成
+            var request = new AddPasswordToPdfRequest
+            {
+                PdfFile = buffer,
+                UserPassword = userPassword,
+                OwnerPassword = ownerPassword
+            };
+            var json = JsonSerializer.Serialize(request);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // API呼び出し
+            var response = await Http.PostAsync("api/AddPasswordToPdf", content);
+            var responseJson = await response.Content.ReadFromJsonAsync<AddPasswordToPdfResponse>();
+
+            if (response.IsSuccessStatusCode)
+            {
+                if( responseJson == null)
+                {
+                    errorMessage = "APIからのレスポンスが無効です。";
+                    return;
+                }
+
+                if(!responseJson.Success)
+                {
+                    errorMessage = $"APIエラー: {responseJson.Message}";
+                    return;
+                }
+
+                // ブラウザでファイルダウンロードを実行
+                await DownloadFile(responseJson.PdfFile, DateTime.Now.ToString("yyyyMMdd_HHmmss_") + selectedFile.Name);
+
+            }
+            else
+            {
+                // 400エラーの場合、レスポンスボディにエラー情報が含まれる
+                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                {
+                    errorMessage = "400エラー: APIエラー: 無効なリクエストです。";
+                    return;
+                }
+                // 500エラーの場合、レスポンスボディは空
+                else if (response.StatusCode == System.Net.HttpStatusCode.InternalServerError)
+                {
+
+                    errorMessage = "500エラー: サーバー内部エラー";
+                    return;
+                }
+                else
+                {
+                    errorMessage =  $"{(int)response.StatusCode}エラー: {response.ReasonPhrase}";
+                    return;
+                }
+            }
 
             // try
             // {
