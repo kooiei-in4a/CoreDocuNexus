@@ -34,7 +34,7 @@ public class AddPasswordToPdf
                 {
                     Success = false,
                     StatusCode = 400,
-                    Message = "Invalid request: Unable to deserialize request body."
+                    Message = "無効なリクエストです。リクエストボディをデシリアライズできませんでした。"
                 });
             }
 
@@ -46,7 +46,7 @@ public class AddPasswordToPdf
                 {
                     Success = false,
                     StatusCode = 400,
-                    Message = "Both ViewerPassword and OwnerPassword are empty."
+                    Message = "閲覧パスワードとオーナーパスワードの両方が空です。"
                 });
             }
 
@@ -59,7 +59,7 @@ public class AddPasswordToPdf
                 {
                     Success = false,
                     StatusCode = 400,
-                    Message = "PDF file is required."
+                    Message = "PDFファイルは必須です。"
                 });
             }
 
@@ -70,7 +70,7 @@ public class AddPasswordToPdf
                 PdfFile = request.PdfFile, // ダミー: 実際にはパスワード保護されたPDFを返す
                 Success = true,
                 StatusCode = 0,
-                Message = "Password successfully added to PDF."
+                Message = "PDFにパスワードが正常に追加されました。"
             };
 
             _logger.LogInformation("AddPasswordToPdf function completed successfully.");
@@ -83,7 +83,7 @@ public class AddPasswordToPdf
             {
                 Success = false,
                 StatusCode = 400,
-                Message = "Invalid JSON format in request body."
+                Message = "リクエストボディのJSON形式が無効です。"
             });
         }
         catch (Exception ex)
