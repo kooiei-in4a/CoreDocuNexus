@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace jp.in4a.CoreDocuNexus.Contracts.AddPasswordToPdf
+namespace jp.in4a.CoreDocuNexus.Contracts.Http.AddPasswordToPdf
 {
     /// <summary>
     /// PDFにパスワードを追加するリクエストのデータを格納します。

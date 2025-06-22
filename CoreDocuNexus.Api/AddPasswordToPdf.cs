@@ -1,4 +1,4 @@
-using jp.in4a.CoreDocuNexus.Contracts.AddPasswordToPdf;
+using jp.in4a.CoreDocuNexus.Contracts.Http.AddPasswordToPdf;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -33,7 +33,7 @@ public class AddPasswordToPdf
                 return new BadRequestObjectResult(new AddPasswordToPdfResponse
                 {
                     Success = false,
-                    ErrorCode = 400,
+                    StatusCode = 400,
                     Message = "Invalid request: Unable to deserialize request body."
                 });
             }
@@ -45,7 +45,7 @@ public class AddPasswordToPdf
                 return new BadRequestObjectResult(new AddPasswordToPdfResponse
                 {
                     Success = false,
-                    ErrorCode = 400,
+                    StatusCode = 400,
                     Message = "Both ViewerPassword and OwnerPassword are empty."
                 });
             }
@@ -58,7 +58,7 @@ public class AddPasswordToPdf
                 return new BadRequestObjectResult(new AddPasswordToPdfResponse
                 {
                     Success = false,
-                    ErrorCode = 400,
+                    StatusCode = 400,
                     Message = "PDF file is required."
                 });
             }
@@ -69,7 +69,7 @@ public class AddPasswordToPdf
             {
                 PdfFile = request.PdfFile, // ダミー: 実際にはパスワード保護されたPDFを返す
                 Success = true,
-                ErrorCode = 0,
+                StatusCode = 0,
                 Message = "Password successfully added to PDF."
             };
 
@@ -82,7 +82,7 @@ public class AddPasswordToPdf
             return new BadRequestObjectResult(new AddPasswordToPdfResponse
             {
                 Success = false,
-                ErrorCode = 400,
+                StatusCode = 400,
                 Message = "Invalid JSON format in request body."
             });
         }

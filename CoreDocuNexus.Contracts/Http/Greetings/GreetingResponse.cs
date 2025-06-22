@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace jp.in4a.CoreDocuNexus.Contracts.Greetings
+namespace jp.in4a.CoreDocuNexus.Contracts.Http.Greetings
 {
     public class GreetingResponse
     {

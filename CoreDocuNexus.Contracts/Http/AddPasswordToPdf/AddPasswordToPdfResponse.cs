@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace jp.in4a.CoreDocuNexus.Contracts.AddPasswordToPdf
+namespace jp.in4a.CoreDocuNexus.Contracts.Http.AddPasswordToPdf
 {
     /// <summary>
     /// PDFへのパスワード追加処理の結果を格納します。
@@ -27,7 +27,7 @@ namespace jp.in4a.CoreDocuNexus.Contracts.AddPasswordToPdf
         /// エラーコードを示します。
         /// 0は成功を意味し、それ以外は特定のエラーを示します。
         /// </summary>
-        public int ErrorCode { get; set; } = 0; // 0 for success, non-zero for error codes
+        public int StatusCode { get; set; } = 0; // 0 for success, non-zero for error codes
 
         /// <summary>
         /// 処理結果に関する追加メッセージ。
