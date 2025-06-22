@@ -1,4 +1,5 @@
 using jp.in4a.CoreDocuNexus.Contracts.Http.AddPasswordToPdf;
+using jp.in4a.CoreDocuNexus.Features.PdfSetPassword;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
@@ -10,10 +11,12 @@ namespace jp.in4a.CoreDocuNexus.Api;
 public class AddPasswordToPdf
 {
     private readonly ILogger<AddPasswordToPdf> _logger;
+    private readonly SetPasswordHandler _setPasswordHandler;
 
-    public AddPasswordToPdf(ILogger<AddPasswordToPdf> logger)
+    public AddPasswordToPdf(ILogger<AddPasswordToPdf> logger, SetPasswordHandler setPasswordHandler)
     {
         _logger = logger;
+        _setPasswordHandler = setPasswordHandler;
     }
 
     [Function("AddPasswordToPdf")]
@@ -29,7 +32,7 @@ public class AddPasswordToPdf
 
             if (request == null)
             {
-                _logger.LogError("Invalid request: Unable to deserialize request body.");
+                _logger.LogError("無効なリクエストです。リクエストボディをデシリアライズできませんでした。");
                 return new BadRequestObjectResult(new AddPasswordToPdfResponse
                 {
                     Success = false,
@@ -41,7 +44,7 @@ public class AddPasswordToPdf
             // どちらかのパスワードが指定されていない場合はエラー
             if (string.IsNullOrWhiteSpace(request.UserPassword) && string.IsNullOrWhiteSpace(request.OwnerPassword))
             {
-                _logger.LogError("Invalid request: Both ViewerPassword and OwnerPassword are empty.");
+                _logger.LogError("閲覧パスワードとオーナーパスワードの両方が空です。");
                 return new BadRequestObjectResult(new AddPasswordToPdfResponse
                 {
                     Success = false,
@@ -54,7 +57,7 @@ public class AddPasswordToPdf
             // 入力データの基本バリデーション
             if (request.PdfFile == null || request.PdfFile.Length == 0)
             {
-                _logger.LogError("Invalid request: PDF file is empty or null.");
+                _logger.LogError("PDFファイルは必須です。");
                 return new BadRequestObjectResult(new AddPasswordToPdfResponse
                 {
                     Success = false,
@@ -63,7 +66,10 @@ public class AddPasswordToPdf
                 });
             }
 
-            // ダミー処理: 実際のPDFパスワード追加処理をここに実装
+            // PDFパスワード追加処理
+            var result = await _setPasswordHandler.HandleAsync(request);
+
+
             // 現在はリクエストのPDFファイルをそのまま返す
             var response = new AddPasswordToPdfResponse
             {
