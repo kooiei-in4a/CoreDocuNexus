@@ -320,29 +320,6 @@
                     return;
                 }
             }
-
-            // try
-            // {
-
-            //     PdfPermissionsFlags permissions　= PdfPermissionsFlags.Default;
-            //     var encrptBuffer = PdfSecurityManager.ApplySecurity(buffer, userPassword, ownerPassword, permissions);
-                
-            //     // ブラウザでファイルダウンロードを実行
-            //     await DownloadFile(encrptBuffer, DateTime.Now.ToString("yyyyMMdd_HHmmss_") + selectedFile.Name);
-                
-            //     // 成功メッセージを表示
-            //     successMessage = "パスワードの設定が完了し、ファイルがダウンロードされました。";
-                
-            //     // パスワードをクリア（セキュリティ対策）
-            //     ClearPasswords();
-                
-            //     // フォームを非表示にする
-            //     showPasswordForm = false;
-            // }
-            // catch (OperationCanceledException)
-            // {
-            //     errorMessage = "処理時間が30秒を超えました。より小さなファイルを試してください。";
-            // }
         }
         catch (Exception ex)
         {
