@@ -24,6 +24,11 @@ public class AddPasswordToPdf
     {
         _logger.LogInformation("AddPasswordToPdf function started processing request.");
 
+        // 処理開始直後に追加
+        _logger.LogInformation("Waiting 10 seconds to reduce server load...");
+        await Task.Delay(10000);
+        _logger.LogInformation("Wait period completed, starting processing.");
+
         try
         {
             // リクエストボディからJSONを読み取り、AddPasswordToPdfRequest型にデシリアライズ
