@@ -20,7 +20,7 @@ namespace jp.in4a.CoreDocuNexus.Contracts.Http.AddPasswordToPdf
         /// <summary>
         /// PDFを開く際に要求される閲覧用パスワード。
         /// </summary>
-        public string ViewerPassword { get; set; } = string.Empty;
+        public string UserPassword { get; set; } = string.Empty;
 
         /// <summary>
         /// 権限の変更など、PDFのセキュリティ設定を変更する際に要求される所有者パスワード。

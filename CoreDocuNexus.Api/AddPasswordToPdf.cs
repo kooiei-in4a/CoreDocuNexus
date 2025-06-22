@@ -39,7 +39,7 @@ public class AddPasswordToPdf
             }
 
             // どちらかのパスワードが指定されていない場合はエラー
-            if (string.IsNullOrWhiteSpace(request.ViewerPassword) && string.IsNullOrWhiteSpace(request.OwnerPassword))
+            if (string.IsNullOrWhiteSpace(request.UserPassword) && string.IsNullOrWhiteSpace(request.OwnerPassword))
             {
                 _logger.LogError("Invalid request: Both ViewerPassword and OwnerPassword are empty.");
                 return new BadRequestObjectResult(new AddPasswordToPdfResponse

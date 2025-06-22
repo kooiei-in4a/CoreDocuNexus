@@ -85,7 +85,7 @@ else if (!string.IsNullOrEmpty(_errorMessage))
             var request = new AddPasswordToPdfRequest
             {
                 PdfFile = sendBytes,
-                ViewerPassword = "test123",
+                UserPassword = "test123",
                 OwnerPassword = "owner456"
             };
             var json = JsonSerializer.Serialize(request);
