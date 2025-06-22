@@ -69,6 +69,18 @@ public class AddPasswordToPdf
             // PDFパスワード追加処理
             var result = await _setPasswordHandler.HandleAsync(request);
 
+            if (!result.IsSuccess)
+            {
+                _logger.LogInformation($"AddPasswordToPdf function fail.{result.Message}");
+                return new BadRequestObjectResult(new AddPasswordToPdfResponse
+                {
+                    PdfFile = result.Value ?? new byte[0],
+                    Success = false,
+                    StatusCode = result.StatusCode,
+                    Message = result.Message
+                });
+            }
+
 
             // 現在はリクエストのPDFファイルをそのまま返す
             var response = new AddPasswordToPdfResponse

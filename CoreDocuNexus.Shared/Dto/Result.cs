@@ -14,14 +14,16 @@ namespace jp.in4a.CoreDocuNexus.Shared.Dto
 
         public int StatusCode { get; } = 0;
         
-        private Result(bool isSuccess, T? value, string error)
+        private Result(bool isSuccess, T? value, string error,int statusCode)
         {
             IsSuccess = isSuccess;
             Value = value;
             Message = error;
+            StatusCode = statusCode;
         }
 
-        public static Result<T> Success(T value) => new Result<T>(true, value, string.Empty);
-        public static Result<T> Failure(string error) => new Result<T>(false, default, error);
+        public static Result<T> Success(T value) => new Result<T>(true, value, string.Empty,0);
+
+        public static Result<T> Failure(string error,int code) => new Result<T>(false, default, error,code);
     }
 }

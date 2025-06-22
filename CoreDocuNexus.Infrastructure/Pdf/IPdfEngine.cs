@@ -8,7 +8,7 @@ namespace jp.in4a.CoreDocuNexus.Infrastructure.Pdf
     /// </summary>
     public interface IPdfEngine
     {
-        Task<Result<byte[]>> SetPasswordAsync(byte[] pdfData, string password);
+        Task<Result<byte[]>> SetPasswordAsync(byte[] pdfData, string userPassword,string ownerPassword);
         Task<Result<byte[]>> MergePdfsAsync(IEnumerable<byte[]> pdfDataList);
     }
 }
