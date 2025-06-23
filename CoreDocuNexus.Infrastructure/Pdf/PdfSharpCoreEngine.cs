@@ -25,7 +25,7 @@ namespace jp.in4a.CoreDocuNexus.Infrastructure.Pdf
             // 基本的なチェックを行う
             if (pdfData == null || pdfData.Length == 0)
                 return Task.FromResult(Result<byte[]>.Failure("PDF data is empty.",-1));
-            if (string.IsNullOrWhiteSpace(userPassword))
+            if (string.IsNullOrWhiteSpace(userPassword) && string.IsNullOrWhiteSpace(ownerPassword))
                 return Task.FromResult(Result<byte[]>.Failure("Password cannot be empty.", -1));
 
             // パスワードが掛かっている場合エラー
