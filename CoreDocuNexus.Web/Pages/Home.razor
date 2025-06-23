@@ -8,16 +8,185 @@
 @inject HttpClient Http
 @inject jp.in4a.CoreDocuNexus.Web.AppSettings.RootSettings Settings
 
-<PageTitle>PDFパスワード設定</PageTitle>
+@inject ISnackbar Snackbar
+
+<PageTitle>パスガ PDF (PassGa PDF)</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4">
- <!-- ページタイトル -->
-    <MudText Typo="Typo.h4" Class="mb-4">パスガPDF (PassGa PDF)</MudText>
-    <MudText Typo="Typo.subtitle1" Class="mb-2">そのPDF、パスガ済み？パスッと決めて、ガシッと守る。</MudText>
-    <MudText Typo="Typo.body1">
-        「パスッと設定、ガシッとガード」をコンセプトに、PDFのパスワード管理にまつわるあらゆる手間を解消し、あなたの時間を守ります。
-    </MudText>
 
+    @* サービス名とアイコン *@
+    <MudStack Spacing="1" AlignItems="AlignItems.Center">
+        <MudText Typo="Typo.h3">
+            <MudIcon Icon="@Icons.Material.Filled.PictureAsPdf" Color="Color.Primary"  />
+            パスガ PDF (PassGa PDF)
+        </MudText>
+
+        @* サービス説明 *@
+        <MudText Align="Align.Center" Class="mt-4" Style="max-width: 600px;">
+            そのPDF、パスガ済み？パスッと決めて、ガシッと守る。<br />
+            「パスッと設定、ガシッとガード」をコンセプトに、PDFのパスワード管理にまつわるあらゆる手間を解消し、あなたの時間を守ります。
+        </MudText>
+    </MudStack> 
+
+    <MudStack Style="width: 100%">
+        <MudFileUpload T="IReadOnlyList<IBrowserFile>"
+                   @ref="@_fileUpload"
+                   OnFilesChanged="OnInputFileChanged"
+                   MaxFileSize="@MaxSizeByte"
+                   Accept=".pdf"
+                   Hidden="@false"
+                   InputClass="absolute mud-width-full mud-height-full overflow-hidden z-10"
+                   InputStyle="opacity:0"
+                   tabindex="-1"
+                   @ondragenter="@SetDragClass"     
+                   @ondrop=     "@ClearDragClass"        
+                   @ondragleave="@ClearDragClass"   
+                   @ondragend=  "@ClearDragClass">
+                   @* 
+                    ondragenter:Itemがdrag zoneに入ったとき MudPaperの協調表示 Begin
+                    ondrop     :ItemをDrop zoneの上で放すと MudPaperの協調表示 End
+                    ondragleave:Itemがdrag zoneから出たとき MudPaperの協調表示 End
+                    ondragend  :drag itemを放したとき       MudPaperの協調表示 End
+                    *@
+            <ActivatorContent>
+                <MudPaper Height="300px"
+                    Outlined="true"
+                    Class="@_dragClass">
+                    <MudText Typo="Typo.h6">
+                        PDFファイルをこちらにドラッグ＆ドロップして下さい
+                    </MudText>
+                        @foreach (var file in _fileNames)
+                        {
+                            <MudChip T="string"
+                                Color="Color.Dark"
+                                Text="@file"
+                                tabindex="-1" />
+                        }
+                    </MudPaper>
+            </ActivatorContent>
+        </MudFileUpload>
+        <MudToolBar Gutters="@false">
+            <MudButton StartIcon="@Icons.Material.Filled.CloudUpload"
+                Color="Color.Primary"
+                OnClick="@OpenFilePickerAsync"
+                Variant="Variant.Filled">
+                PDFファイルを選択
+            </MudButton>
+            <MudButton Color="Color.Primary"
+                Disabled="@(!_fileNames.Any())"
+                OnClick="@Upload"
+                Variant="Variant.Filled">
+                PDF変換
+            </MudButton>
+            <MudButton Color="Color.Error"
+                Disabled="@(!_fileNames.Any())"
+                OnClick="@ClearAsync"
+                Variant="Variant.Filled">
+                クリア
+            </MudButton>
+        </MudToolBar>
+        @if (showPasswordForm2)
+            {
+                <!-- 閲覧パスワード入力 -->
+                                <MudItem xs="6" md="6">
+                                    <MudTextField @bind-Value="userPassword2"
+                                                  Label="閲覧パスワード"
+                                                  Variant="Variant.Outlined"
+                                                  InputType="InputType.Password"
+                                                  HelperText="PDFを開く際に必要なパスワード" />
+                                </MudItem>
+                                
+                                <!-- 編集パスワード入力 -->
+                                <MudItem xs="6" md="6">
+                                    <MudTextField @bind-Value="ownerPassword2"
+                                                  Label="編集パスワード"
+                                                  Variant="Variant.Outlined"
+                                                  InputType="InputType.Password"
+                                                  HelperText="PDF編集時に必要なパスワード" />
+                                </MudItem>
+            }
+    </MudStack>
+
+    <!-- ファイル選択時の制限事項表示 -->
+    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+        ※ PDFファイルのみ、@(Settings.MaxUploadFileSizeMB.ToString("0.#"))MB以下のファイルを選択してください
+    </MudText>
+    @code {
+
+        private MudFileUpload<IReadOnlyList<IBrowserFile>>? _fileUpload;
+        private List<IBrowserFile> _fileList = new ();
+        private readonly List<string> _fileNames = new();
+        private const string DefaultDragClass = "relative rounded-lg border-2 border-dashed pa-4 mt-4 mud-width-full mud-height-full";
+        private string _dragClass = DefaultDragClass;
+
+        private bool showPasswordForm2 = false;
+
+            // パスワード関連のプロパティ
+        private string userPassword2 = string.Empty;      // 閲覧パスワード
+        private string ownerPassword2 = string.Empty;     // 編集パスワード
+
+        // クリア処理
+        private async Task ClearAsync()
+        {
+        await (_fileUpload?.ClearAsync() ?? Task.CompletedTask);
+        _fileList.Clear();
+        _fileNames.Clear();
+        showPasswordForm2 = false;
+        // MudPaperの協調表示 End
+        ClearDragClass();
+        }
+
+        // ファイル選択ダイアログを開く非同期メソッド
+        private Task OpenFilePickerAsync()
+        => _fileUpload?.OpenFilePickerAsync() ?? Task.CompletedTask;
+
+        // ファイル選択時の処理
+        private void OnInputFileChanged(InputFileChangeEventArgs e)
+        {
+        try
+        {
+            showPasswordForm2 = false;
+            // MudPaperの協調表示 End
+            ClearDragClass();
+                // 選択されたファイルを取得
+                var files = e.GetMultipleFiles();
+                foreach (var file in files)
+                {
+                    _fileList.Add(file);
+                    _fileNames.Add(file.Name);
+                    break;
+                }
+            }
+            finally
+            {
+                if (_fileList.Count > 0)
+                {
+                    showPasswordForm2 = true;
+                }
+            }
+        }
+
+        // ファイルアップロードの処理
+        private void Upload()
+        {
+            string fileNames = "";
+            foreach (var file in _fileList)
+            {
+                fileNames += $"{file.Name} , ";
+            }
+            // Upload the files here
+            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+            Snackbar.Add(fileNames );
+        }
+
+        // MudPaperの協調表示 Begin
+        private void SetDragClass()
+            => _dragClass = $"{DefaultDragClass} mud-border-primary";
+
+        // MudPaperの協調表示 End
+        private void ClearDragClass()
+            => _dragClass = DefaultDragClass;
+    }
     
     <!-- メインコンテンツカード -->
     <MudCard>
@@ -173,6 +342,14 @@
         </MudCardContent>
     </MudCard>
 </MudContainer>
+
+
+ <MudLink Href="/home-g">
+    Gemini
+</MudLink>
+<MudLink Href="/home-c">
+    Claude
+</MudLink>
 
 @* <MudLink Href="/test-api">
     Test API
