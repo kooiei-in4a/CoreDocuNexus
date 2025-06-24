@@ -50,6 +50,10 @@
                     </MudPaper>
             </ActivatorContent>
         </MudFileUpload>
+        <!-- ファイル選択時の制限事項表示 -->
+        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+            ※ PDFファイルのみ、@(Settings.MaxUploadFileSizeMB.ToString("0.#"))MB以下のファイルを選択してください
+        </MudText>
         <MudToolBar Gutters="@false">
             <MudButton StartIcon="@Icons.Material.Filled.CloudUpload"
                        Color="Color.Primary"
@@ -80,30 +84,38 @@
        
         @if (showPasswordForm)
             {
-                <!-- 閲覧パスワード入力 -->
-                                <MudItem xs="6" md="6">
-                                    <MudTextField @bind-Value="userPassword"
-                                                  Label="閲覧パスワード"
-                                                  Variant="Variant.Outlined"
-                                                  InputType="InputType.Password"
-                                                  HelperText="PDFを開く際に必要なパスワード" />
-                                </MudItem>
-                                
-                                <!-- 編集パスワード入力 -->
-                                <MudItem xs="6" md="6">
-                                    <MudTextField @bind-Value="ownerPassword"
-                                                  Label="編集パスワード"
-                                                  Variant="Variant.Outlined"
-                                                  InputType="InputType.Password"
-                                                  HelperText="PDF編集時に必要なパスワード" />
-                                </MudItem>
+            <MudCard Elevation="2" Class="mt-4">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">パスワード設定</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudGrid Spacing="2">
+                        <MudItem xs="12" md="6">
+                            <MudTextField @bind-Value="userPassword"
+                                          Label="閲覧パスワード"
+                                          Variant="Variant.Outlined"
+                                          HelperText="PDFを開く際に必要なパスワード"
+                                          InputType="InputType.Password"
+                                          Adornment="Adornment.End" />
+                        </MudItem>
+
+                        <MudItem xs="12" md="6">
+                            <MudTextField @bind-Value="ownerPassword"
+                                          Label="編集パスワード"
+                                          Variant="Variant.Outlined"
+                                          HelperText="PDF編集時に必要なパスワード"
+                                          InputType="InputType.Password"
+                                          Adornment="Adornment.End" />
+                        </MudItem>
+                    </MudGrid>
+                </MudCardContent>
+            </MudCard>
             }
     </MudStack>
 
-    <!-- ファイル選択時の制限事項表示 -->
-    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
-        ※ PDFファイルのみ、@(Settings.MaxUploadFileSizeMB.ToString("0.#"))MB以下のファイルを選択してください
-    </MudText>
+
 
     <!-- 処理中表示 -->
     @if (isProcessing)
