@@ -16,7 +16,7 @@
     <MudStack Spacing="1" AlignItems="AlignItems.Center">
         @* サービス名 *@
         <MudText Typo="Typo.h3">
-            <MudIcon Icon="@Icons.Material.Filled.PictureAsPdf" Color="Color.Primary"  />
+            <MudIcon Icon="@Icons.Material.Filled.PictureAsPdf" Color="Color.Primary" />
             パスガ PDF (PassGa PDF)
         </MudText>
 
@@ -33,60 +33,53 @@
         ondragend  :drag itemを放したとき       MudPaperの協調表示 End *@
     <MudStack Style="width: 100%">
         <MudFileUpload T="IReadOnlyList<IBrowserFile>" @ref="@_fileUpload"
-                   OnFilesChanged="OnInputFileChanged"
-                   MaxFileSize="@MaxSizeByte" Accept=".pdf" Hidden="@false"
-                   InputClass="absolute mud-width-full mud-height-full overflow-hidden z-10"
-                   InputStyle="opacity:0"
-                   tabindex="-1"
-                   @ondragenter="@SetDragClass"   @ondrop=     "@ClearDragClass"        
-                   @ondragleave="@ClearDragClass" @ondragend=  "@ClearDragClass">
+                       OnFilesChanged="OnInputFileChanged"
+                       MaxFileSize="@MaxSizeByte" Accept=".pdf" Hidden="@false"
+                       InputClass="absolute mud-width-full mud-height-full overflow-hidden z-10"
+                       InputStyle="opacity:0"
+                       tabindex="-1"
+                       @ondragenter="@SetDragClass" @ondrop="@ClearDragClass"
+                       @ondragleave="@ClearDragClass" @ondragend="@ClearDragClass">
             <ActivatorContent>
                 <MudPaper Height="300px" Outlined="true" Class="@_dragClass">
                     <MudText Typo="Typo.h6">PDFファイルをこちらにドラッグ＆ドロップして下さい</MudText>
-                        @foreach (var file in _fileNames)
+
+                    <MudToolBar Gutters="@false">
+                        <MudButton StartIcon="@Icons.Material.Filled.CloudUpload" Size="Size.Large"
+                                   Color="Color.Primary"
+                                   Variant="Variant.Outlined"
+                                   OnClick="@OpenFilePickerAsync">
+                            PDFファイルを選択
+                        </MudButton>
+                        @if (_fileNames.Any())
                         {
-                            <MudChip T="string" Color="Color.Dark" Text="@file" tabindex="-1" />
+                            <MudButton Class="mr-2"
+                                       StartIcon="@Icons.Material.Filled.Clear" Size="Size.Large"
+                                       Color="Color.Error"
+                                       Variant="Variant.Outlined"
+                                       OnClick="@ClearAsync"
+                                       Disabled="@(!_fileNames.Any())">
+                                クリア
+                            </MudButton>
                         }
-                    </MudPaper>
+                    </MudToolBar>
+                    @foreach (var file in _fileNames)
+                    {
+                        <MudChip T="string" Color="Color.Dark" Text="@file" tabindex="-1" />
+                    }
+                </MudPaper>
+
             </ActivatorContent>
+
         </MudFileUpload>
         <!-- ファイル選択時の制限事項表示 -->
         <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
             ※ PDFファイルのみ、@(Settings.MaxUploadFileSizeMB.ToString("0.#"))MB以下のファイルを選択してください
         </MudText>
-        <MudToolBar Gutters="@false">
-            <MudButton StartIcon="@Icons.Material.Filled.CloudUpload"
-                       Color="Color.Primary"
-                       Variant="Variant.Outlined"
-                       OnClick="@OpenFilePickerAsync">
-                PDFファイルを選択
-            </MudButton>
-            <MudButton Class="mr-2"
-                       StartIcon="@Icons.Material.Filled.Clear"
-                       Color="Color.Error"
-                       Variant="Variant.Outlined"
-                       OnClick="@ClearAsync"
-                       Disabled="@(!_fileNames.Any())">
-                クリア
-            </MudButton>
-            <MudSpacer /> @* ← これを追加して左右に振り分ける *@
-
-            <MudButton StartIcon="@Icons.Material.Filled.DataExploration"
-                       Color="Color.Primary"
-                       Variant="Variant.Filled"
-                       OnClick="@Upload"
-                       Disabled="@(!isExecuteBtn)">
-                PDF変換
-            </MudButton>
-        </MudToolBar>
 
         <MudCard Elevation="2" Class="mt-4">
-            <MudCardHeader>
-                <CardHeaderContent>
-                    <MudText Typo="Typo.h6">パスワード設定</MudText>
-                </CardHeaderContent>
-            </MudCardHeader>
             <MudCardContent>
+                <MudText Typo="Typo.h6">パスワード設定</MudText>
                 <MudGrid Spacing="2">
                     <MudItem xs="12" md="6">
                         <MudTextField @bind-Value="userPassword"
@@ -108,6 +101,13 @@
                 </MudGrid>
             </MudCardContent>
         </MudCard>
+        <MudButton StartIcon="@Icons.Material.Filled.DataExploration" Size="Size.Large"
+                   Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   OnClick="@Upload"
+                   Disabled="@(!isExecuteBtn)">
+            <MudIcon Icon="@Icons.Material.Filled.Download" /> PDF変換
+        </MudButton>
     </MudStack>
 
 
@@ -140,10 +140,10 @@
             @successMessage
         </MudAlert>
     }
-    
+
 </MudContainer>
 
- <MudLink Href="/home-g">
+<MudLink Href="/home-g">
     Gemini
 </MudLink>
 <MudLink Href="/home-c">
@@ -163,7 +163,7 @@
         {
             isExecuteBtn = false;
             StateHasChanged();
-        }           
+        }
     }
 
     private long MaxSizeByte = 1;   // 最大ファイルサイズ（バイト単位）
@@ -238,7 +238,8 @@
                 _fileNames.Add(file.Name);
                 break;
             }
-        }catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             errorMessage = $"ファイル選択時にエラーが発生しました: {ex.Message}";
         }
@@ -292,7 +293,8 @@
             Snackbar.Add("ダウンロードが完了しました。");
 
 
-        }catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             errorMessage = $"パスワード設定処理中にエラーが発生しました: {ex.Message}";
             return;
@@ -303,7 +305,7 @@
             isProcessing = false;
             processingMessage = string.Empty;
             StateHasChanged();
-        }   
+        }
     }
 
     private bool CheckResponse(HttpResponseMessage response, AddPasswordToPdfResponse? responseJson)
@@ -322,7 +324,7 @@
                 return false;
             }
 
-            // 
+            //
             return true;
         }
         else
