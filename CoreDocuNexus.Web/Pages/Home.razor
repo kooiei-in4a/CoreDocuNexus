@@ -10,138 +10,175 @@
 @inject ISnackbar Snackbar
 
 <PageTitle>パスガ PDF (PassGa PDF)</PageTitle>
-
-<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-4">
-
-    <MudStack Spacing="1" AlignItems="AlignItems.Center">
-        @* サービス名 *@
-        <MudText Typo="Typo.h3">
-            <MudIcon Icon="@Icons.Material.Filled.PictureAsPdf" Color="Color.Primary" />
-            パスガ PDF (PassGa PDF)
-        </MudText>
-
-        @* サービス説明 *@
-        <MudText Align="Align.Center" Class="mt-4" Style="max-width: 600px;">
-            そのPDF、パスガ済み？パスッと決めて、ガシッと守る。<br />
-            「パスッと設定、ガシッとガード」をコンセプトに、PDFのパスワード管理にまつわるあらゆる手間を解消し、あなたの時間を守ります。
-        </MudText>
-    </MudStack>
-
-    @*  ondragenter:Itemがdrag zoneに入ったとき MudPaperの協調表示 Begin
-        ondrop     :ItemをDrop zoneの上で放すと MudPaperの協調表示 End
-        ondragleave:Itemがdrag zoneから出たとき MudPaperの協調表示 End
-        ondragend  :drag itemを放したとき       MudPaperの協調表示 End *@
-    <MudStack Style="width: 100%">
-        <MudFileUpload T="IReadOnlyList<IBrowserFile>" @ref="@_fileUpload"
-                       OnFilesChanged="OnInputFileChanged"
-                       MaxFileSize="@MaxSizeByte" Accept=".pdf" Hidden="@false"
-                       InputClass="absolute mud-width-full mud-height-full overflow-hidden z-10"
-                       InputStyle="opacity:0"
-                       tabindex="-1"
-                       @ondragenter="@SetDragClass" @ondrop="@ClearDragClass"
-                       @ondragleave="@ClearDragClass" @ondragend="@ClearDragClass">
-            <ActivatorContent>
-                <MudPaper Height="300px" Outlined="true" Class="@_dragClass">
-                    <MudText Typo="Typo.h6">PDFファイルをこちらにドラッグ＆ドロップして下さい</MudText>
-
-                    <MudToolBar Gutters="@false">
-                        <MudButton StartIcon="@Icons.Material.Filled.CloudUpload" Size="Size.Large"
-                                   Color="Color.Primary"
-                                   Variant="Variant.Outlined"
-                                   OnClick="@OpenFilePickerAsync">
-                            PDFファイルを選択
-                        </MudButton>
-                        @if (_fileNames.Any())
-                        {
-                            <MudButton Class="mr-2"
-                                       StartIcon="@Icons.Material.Filled.Clear" Size="Size.Large"
-                                       Color="Color.Error"
-                                       Variant="Variant.Outlined"
-                                       OnClick="@ClearAsync"
-                                       Disabled="@(!_fileNames.Any())">
-                                クリア
-                            </MudButton>
-                        }
-                    </MudToolBar>
-                    @foreach (var file in _fileNames)
-                    {
-                        <MudChip T="string" Color="Color.Dark" Text="@file" tabindex="-1" />
-                    }
-                </MudPaper>
-
-            </ActivatorContent>
-
-        </MudFileUpload>
-        <!-- ファイル選択時の制限事項表示 -->
-        <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
-            ※ PDFファイルのみ、@(Settings.MaxUploadFileSizeMB.ToString("0.#"))MB以下のファイルを選択してください
-        </MudText>
-
-        <MudCard Elevation="2" Class="mt-4">
-            <MudCardContent>
-                <MudText Typo="Typo.h6">パスワード設定</MudText>
-                <MudGrid Spacing="2">
-                    <MudItem xs="12" md="6">
-                        <MudTextField @bind-Value="userPassword"
-                                      Label="閲覧パスワード"
-                                      Variant="Variant.Outlined"
-                                      HelperText="PDFを開く際に必要なパスワード"
-                                      InputType="InputType.Password"
-                                      OnBlur="IsExecute" />
-                    </MudItem>
-
-                    <MudItem xs="12" md="6">
-                        <MudTextField @bind-Value="ownerPassword"
-                                      Label="編集パスワード"
-                                      Variant="Variant.Outlined"
-                                      HelperText="PDF編集時に必要なパスワード"
-                                      InputType="InputType.Password"
-                                      OnBlur="IsExecute" />
-                    </MudItem>
-                </MudGrid>
-            </MudCardContent>
-        </MudCard>
-        <MudButton StartIcon="@Icons.Material.Filled.DataExploration" Size="Size.Large"
-                   Color="Color.Primary"
-                   Variant="Variant.Filled"
-                   OnClick="@Upload"
-                   Disabled="@(!isExecuteBtn)">
-            <MudIcon Icon="@Icons.Material.Filled.Download" /> PDF変換
-        </MudButton>
-    </MudStack>
-
-
-
-    <!-- 処理中表示 -->
-    @if (isProcessing)
-    {
-        <MudGrid Class="mt-4">
-            <MudItem xs="12" Class="text-center">
-                <MudProgressCircular Indeterminate="true" />
-                <MudText Typo="Typo.body1" Class="mt-2">
-                    @processingMessage
+<MudContainer MaxWidth="MaxWidth.Medium" Class="pa-4">
+    <MudPaper Class="pa-6" Style="background-color: #f5f5f5; border-radius: 12px;">
+        <!-- ヘッダー部分 -->
+        <MudGrid Justify="Justify.Center" Class="mb-4">
+            <MudItem xs="12">
+                <MudText Typo="Typo.h3" Align="Align.Center" Class="mb-2"
+                         Style="@($"color:{Colors.Gray.Darken3}; font-weight: bold;")">
+                    <MudIcon Icon="@Icons.Material.Filled.PictureAsPdf" Size="Size.Large"
+                             Style="@($"color:{Colors.LightBlue.Accent4}; margin-right: 8px;")" />
+                    パスガ PDF (PassGa PDF)
                 </MudText>
             </MudItem>
         </MudGrid>
-    }
 
-    <!-- エラーメッセージ表示 -->
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <MudAlert Severity="Severity.Error" Class="mt-4">
-            @errorMessage
-        </MudAlert>
-    }
+        <!-- サービス説明 -->
+        <MudGrid Justify="Justify.Center" Class="mb-6">
+            <MudItem xs="12">
+                <MudText Typo="Typo.body1" Align="Align.Center" Style="line-height: 1.8; color: #666;">
+                    そのPDF、パスガ済み？パスッと決めて、ガシッと守る。<br />
+                    「パスッと設定、ガシッとガード」をコンセプトに、PDFのパスワード管理にまつわるあらゆる手間を解消し、あなたの時間を守ります。
+                </MudText>
+            </MudItem>
+        </MudGrid>
 
-    <!-- 成功メッセージ表示 -->
-    @if (!string.IsNullOrEmpty(successMessage))
-    {
-        <MudAlert Severity="Severity.Success" Class="mt-4">
-            @successMessage
-        </MudAlert>
-    }
+        <MudGrid Justify="Justify.Center" Class="mb-4">
+            <MudItem xs="12">
+                <MudFileUpload T="IReadOnlyList<IBrowserFile>" @ref="@_fileUpload"
+                               OnFilesChanged="OnInputFileChanged"
+                               MaxFileSize="@MaxSizeByte" Accept=".pdf" Hidden="@false"
+                               InputClass="absolute mud-width-full mud-height-full overflow-hidden z-10"
+                               InputStyle="opacity:0"
+                               tabindex="-1"
+                               @ondragenter="@SetDragClass" @ondrop="@ClearDragClass"
+                               @ondragleave="@ClearDragClass" @ondragend="@ClearDragClass">
+                    <ActivatorContent>
+                        <MudPaper Style="border: 3px dashed #4285f4;
+                                background-color: white;
+                                border-radius: 8px;
+                                min-height: 200px;
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: center;
+                                align-items: center;" Class="@_dragClass">
+                            <MudText Typo="Typo.h6" Align="Align.Center" Class="mb-4" Style="color: #333; font-weight: 500;">
+                                PDFファイルをこちらにドラッグ＆ドロップして下さい
+                            </MudText>
+                            <!-- 区切り線 -->
+                            <MudDivider Class="my-4" Style="width: 100%;">
+                                <MudText Typo="Typo.body2" Style="color: #999;">
+                                    または
+                                </MudText>
+                            </MudDivider>
 
+                            <MudToolBar Gutters="@false">
+                                <MudButton StartIcon="@Icons.Material.Filled.CloudUpload" Size="Size.Large"
+                                           Color="Color.Primary"
+                                           Variant="Variant.Filled"
+                                           OnClick="@OpenFilePickerAsync"
+                                           Style="padding: 12px 32px; font-size: 16px; border-radius: 8px;">
+                                    PDFファイルを選択
+                                </MudButton>
+                                @if (_fileNames.Any())
+                                {
+                                    <MudButton Class="mr-2"
+                                               StartIcon="@Icons.Material.Filled.Clear" Size="Size.Large"
+                                               Color="Color.Error"
+                                               Variant="Variant.Outlined"
+                                               OnClick="@ClearAsync"
+                                               Disabled="@(!_fileNames.Any())">
+                                        クリア
+                                    </MudButton>
+                                }
+                            </MudToolBar>
+                            @foreach (var file in _fileNames)
+                            {
+                                <MudChip T="string" Color="Color.Dark" Text="@file" tabindex="-1" />
+                            }
+                        </MudPaper>
+
+                    </ActivatorContent>
+
+                </MudFileUpload>
+            </MudItem>
+        </MudGrid>
+
+        <MudPaper Style="border: 3px dashed #4285f4;
+                background-color: white;
+                border-radius: 8px;
+                min-height: 100px;
+                padding: 16px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;" Class="@_dragClass">
+            <MudGrid Justify="Justify.Center" AlignItems="AlignItems.Center">
+                <MudItem xs="12" md="12" lg="3" Class="d-flex align-center justify-center">
+                    <MudText Typo="Typo.h6">パスワード設定</MudText>
+                </MudItem>
+                <MudItem xs="12" md="6" lg="4">
+                    <MudTextField @bind-Value="userPassword"
+                                  Label="閲覧パスワード"
+                                  Variant="Variant.Outlined"
+                                  HelperText="PDFを開く際に必要なパスワード"
+                                  InputType="InputType.Password"
+                                  OnBlur="IsExecute" />
+                </MudItem>
+
+                <MudItem xs="12" md="6" lg="4">
+                    <MudTextField @bind-Value="ownerPassword"
+                                  Label="編集パスワード"
+                                  Variant="Variant.Outlined"
+                                  HelperText="PDF編集時に必要なパスワード"
+                                  InputType="InputType.Password"
+                                  OnBlur="IsExecute" />
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="4">
+                    <MudButton StartIcon="@Icons.Material.Filled.Download" Size="Size.Large"
+                               Color="Color.Primary"
+                               Variant="Variant.Filled"
+                               OnClick="@Upload"
+                               Disabled="@(!isExecuteBtn)"
+                               Style="padding: 16px; font-size: 18px; border-radius: 8px;">
+                        ダウンロード
+                    </MudButton>
+                </MudItem>
+
+                <MudItem xs="12" sm="12" md="12">
+                    <MudText Typo="Typo.body2" Color="Color.Secondary" Class="mb-3">
+                        ※ PDFファイルのみ、@(Settings.MaxUploadFileSizeMB.ToString("0.#"))MB以下のファイルを選択してください
+                    </MudText>
+                </MudItem>
+                <!-- エラーメッセージ表示 -->
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <MudItem xs="12" sm="12" md="12">
+                        <MudAlert Severity="Severity.Error" Class="mt-4">
+                            @errorMessage
+                        </MudAlert>
+                    </MudItem>
+
+                }
+                <!-- 成功メッセージ表示 -->
+                @if (!string.IsNullOrEmpty(successMessage))
+                {
+                    <MudItem xs="12" sm="12" md="12">
+                        <MudAlert Severity="Severity.Success" Class="mt-4">
+                            @successMessage
+                        </MudAlert>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudPaper>
+    </MudPaper>
 </MudContainer>
+
+<!-- 処理中表示 -->
+@if (isProcessing)
+{
+    <MudGrid Class="mt-4">
+        <MudItem xs="12" Class="text-center">
+            <MudProgressCircular Indeterminate="true" />
+            <MudText Typo="Typo.body1" Class="mt-2">
+                @processingMessage
+            </MudText>
+        </MudItem>
+    </MudGrid>
+}
+
 
 <MudLink Href="/home-g">
     Gemini
@@ -179,7 +216,8 @@
     private List<IBrowserFile> _fileList = new();
     private readonly List<string> _fileNames = new();
 
-    private const string DefaultDragClass = "relative rounded-lg border-2 border-dashed pa-4 mt-4 mud-width-full mud-height-full";
+    //private const string DefaultDragClass = "relative rounded-lg border-2 border-dashed pa-4 mt-4 mud-width-full mud-height-full";
+    private const string DefaultDragClass = "mb-4 ";
     private string _dragClass = DefaultDragClass;
 
     // パスワード関連のプロパティ
