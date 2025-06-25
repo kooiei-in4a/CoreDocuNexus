@@ -65,10 +65,10 @@
                             <!-- 区切り線 -->
                             <MudDivider Class="my-4" Style="width: 100%;" />
 
-                            @foreach (var file in _fileNames)
+                            @foreach (var file in _fileList)
                             {
-                                <MudItem xs="10" sm="6" md="4">
-                                    <MudChip T="string" Color="Color.Dark" Text="@file" tabindex="-1" />
+                                <MudItem xs="12" sm="6" md="6">
+                                    <MudChip T="string" Color="Color.Dark" Text="@(file.Name + "(" + FormatFileSize(file.Size) + ")")" tabindex="-1" />
                                 </MudItem>
                             }
                             
@@ -81,17 +81,6 @@
                                            Style="padding: 12px 32px; font-size: 16px; border-radius: 8px;">
                                     PDFファイルを選択
                                 </MudButton>
-                                @if (_fileNames.Any())
-                                {
-                                    <MudButton Class="mr-2"
-                                               StartIcon="@Icons.Material.Filled.Clear" Size="Size.Large"
-                                               Color="Color.Error"
-                                               Variant="Variant.Outlined"
-                                               OnClick="@ClearAsync"
-                                               Disabled="@(!_fileNames.Any())">
-                                        クリア
-                                    </MudButton>
-                                }
                             </MudToolBar>
   
                         </MudPaper>
@@ -256,6 +245,7 @@
             ClearDragClass();
             // 選択されたファイルを取得
             var files = e.GetMultipleFiles();
+            
             foreach (var file in files)
             {
                 // ファイルサイズチェック（1MB = 1,048,576 bytes）
@@ -271,7 +261,7 @@
                     errorMessage = "PDFファイルを選択してください。";
                     return;
                 }
-
+                _fileList.Clear();
                 _fileList.Add(file);
                 _fileNames.Add(file.Name);
                 break;
@@ -422,6 +412,20 @@
     {
         errorMessage = string.Empty;
         successMessage = string.Empty;
+    }
+
+    /// <summary>
+    /// ファイルサイズ（バイト）を適切な単位（B, KB, MB, GB...）の文字列に変換します。
+    /// </summary>
+    /// <param name="bytes">ファイルサイズ（バイト単位）</param>
+    /// <returns>フォーマットされたファイルサイズの文字列</returns>
+    private string FormatFileSize(long bytes)
+    {
+        if (bytes == 0) return "0 B";
+
+        string[] suffixes = { "B", "KB", "MB", "GB", "TB", "PB" };
+        int i = (int)Math.Floor(Math.Log(bytes, 1024));
+        return $"{bytes / Math.Pow(1024, i):F2} {suffixes[i]}";
     }
 
     // MudPaperの協調表示 Begin
