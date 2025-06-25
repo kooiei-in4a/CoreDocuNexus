@@ -61,58 +61,53 @@
                        OnClick="@OpenFilePickerAsync">
                 PDFファイルを選択
             </MudButton>
-
-            <MudSpacer /> @* ← これを追加して左右に振り分ける *@
-
-            <MudButton Class="mr-2" 
+            <MudButton Class="mr-2"
                        StartIcon="@Icons.Material.Filled.Clear"
                        Color="Color.Error"
-                       Variant="Variant.Outlined" 
+                       Variant="Variant.Outlined"
                        OnClick="@ClearAsync"
                        Disabled="@(!_fileNames.Any())">
                 クリア
             </MudButton>
+            <MudSpacer /> @* ← これを追加して左右に振り分ける *@
 
             <MudButton StartIcon="@Icons.Material.Filled.DataExploration"
                        Color="Color.Primary"
                        Variant="Variant.Filled"
                        OnClick="@Upload"
-                       Disabled="@(!IsExecute())">
+                       Disabled="@(!isExecuteBtn)">
                 PDF変換
             </MudButton>
         </MudToolBar>
-       
-        @if (showPasswordForm)
-            {
-            <MudCard Elevation="2" Class="mt-4">
-                <MudCardHeader>
-                    <CardHeaderContent>
-                        <MudText Typo="Typo.h6">パスワード設定</MudText>
-                    </CardHeaderContent>
-                </MudCardHeader>
-                <MudCardContent>
-                    <MudGrid Spacing="2">
-                        <MudItem xs="12" md="6">
-                            <MudTextField @bind-Value="userPassword"
-                                          Label="閲覧パスワード"
-                                          Variant="Variant.Outlined"
-                                          HelperText="PDFを開く際に必要なパスワード"
-                                          InputType="InputType.Password"
-                                          onchange="@IsExecute()" />
-                        </MudItem>
 
-                        <MudItem xs="12" md="6">
-                            <MudTextField @bind-Value="ownerPassword"
-                                          Label="編集パスワード"
-                                          Variant="Variant.Outlined"
-                                          HelperText="PDF編集時に必要なパスワード"
-                                          InputType="InputType.Password"
-                                          onchange="@IsExecute()" />
-                        </MudItem>
-                    </MudGrid>
-                </MudCardContent>
-            </MudCard>
-            }
+        <MudCard Elevation="2" Class="mt-4">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">パスワード設定</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudGrid Spacing="2">
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="userPassword"
+                                      Label="閲覧パスワード"
+                                      Variant="Variant.Outlined"
+                                      HelperText="PDFを開く際に必要なパスワード"
+                                      InputType="InputType.Password"
+                                      OnBlur="IsExecute" />
+                    </MudItem>
+
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="ownerPassword"
+                                      Label="編集パスワード"
+                                      Variant="Variant.Outlined"
+                                      HelperText="PDF編集時に必要なパスワード"
+                                      InputType="InputType.Password"
+                                      OnBlur="IsExecute" />
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+        </MudCard>
     </MudStack>
 
 
@@ -157,19 +152,22 @@
 
 @code {
 
-    private bool IsExecute()
+    private void IsExecute()
     {
         if (_fileList.Count > 0 && (!string.IsNullOrWhiteSpace(userPassword) || !string.IsNullOrEmpty(ownerPassword)))
         {
-            return true;
+            isExecuteBtn = true; // 実行ボタンを有効化
+            StateHasChanged();
         }
         else
         {
-            return false;
+            isExecuteBtn = false;
+            StateHasChanged();
         }           
     }
 
     private long MaxSizeByte = 1;   // 最大ファイルサイズ（バイト単位）
+    private bool isExecuteBtn = false; // 実行ボタンの有効/無効状態
 
     // UI状態管理のプロパティ
     private bool isProcessing = false;               // 処理中フラグ
@@ -180,11 +178,9 @@
     private MudFileUpload<IReadOnlyList<IBrowserFile>>? _fileUpload;
     private List<IBrowserFile> _fileList = new();
     private readonly List<string> _fileNames = new();
-    
+
     private const string DefaultDragClass = "relative rounded-lg border-2 border-dashed pa-4 mt-4 mud-width-full mud-height-full";
     private string _dragClass = DefaultDragClass;
-
-    private bool showPasswordForm = false;
 
     // パスワード関連のプロパティ
     private string userPassword = string.Empty;      // 閲覧パスワード
@@ -205,7 +201,6 @@
         await (_fileUpload?.ClearAsync() ?? Task.CompletedTask);
         _fileList.Clear();
         _fileNames.Clear();
-        showPasswordForm = false;
         // MudPaperの協調表示 End
         ClearDragClass();
     }
@@ -219,7 +214,6 @@
     {
         try
         {
-            showPasswordForm = false;
             // MudPaperの協調表示 End
             ClearDragClass();
             // 選択されたファイルを取得
@@ -242,12 +236,15 @@
 
                 _fileList.Add(file);
                 _fileNames.Add(file.Name);
-                showPasswordForm = true;
                 break;
             }
         }catch (Exception ex)
         {
             errorMessage = $"ファイル選択時にエラーが発生しました: {ex.Message}";
+        }
+        finally
+        {
+            IsExecute(); // パスワード入力欄の有効/無効を更新
         }
     }
 
