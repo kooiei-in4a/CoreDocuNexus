@@ -1,0 +1,138 @@
+﻿@page "/home-g2"
+
+<style>
+    /* Modern & Gradation スタイル */
+    body {
+        background-color: #f4f7f6; /* オフホワイトの背景 */
+        font-family: 'Helvetica Neue', 'Arial', 'Hiragino Sans', 'sans-serif';
+    }
+
+    .passga-container-modern {
+        max-width: 580px;
+        margin: 4rem auto;
+    }
+
+    .passga-card {
+        background-color: #ffffff;
+        padding: 2.5rem;
+        border-radius: 16px; /* 大きめの角丸 */
+        box-shadow: 0 10px 30px rgba(0, 70, 150, 0.08); /* 柔らかな影 */
+        margin-bottom: 2rem;
+    }
+
+    .passga-header h1 {
+        font-size: 2rem;
+        font-weight: bold;
+        background: -webkit-linear-gradient(45deg, #007BFF, #8E44AD); /* グラデーションテキスト */
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+    
+    .passga-header p {
+        text-align: center;
+        font-size: 0.95rem;
+        color: #555;
+        margin-bottom: 2.5rem;
+    }
+    
+    .upload-box-modern {
+        border: 2px dashed #a0c4ff; /* グラデーションに合わせた破線 */
+        border-radius: 12px;
+        padding: 2.5rem;
+        text-align: center;
+        transition: background-color 0.3s;
+    }
+    
+    .upload-box-modern:hover {
+        background-color: #f8faff;
+    }
+    
+    .upload-box-modern .icon {
+        font-size: 3rem;
+        color: #007BFF;
+        margin-bottom: 1rem;
+    }
+
+    .form-group-modern {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group-modern label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+
+    .form-control-modern {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        font-size: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        transition: border-color 0.3s, box-shadow 0.3s;
+        box-sizing: border-box;
+    }
+    
+    .form-control-modern:focus {
+        outline: none;
+        border-color: #007BFF;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+    }
+    
+    .btn-modern {
+        display: block;
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.1rem;
+        font-weight: bold;
+        color: #fff;
+        background-image: linear-gradient(45deg, #007BFF, #580479);
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.3s;
+        text-align: center;
+        text-decoration: none;
+    }
+    
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0, 123, 255, 0.2);
+    }
+
+</style>
+
+<div class="passga-container-modern">
+    <div class="passga-header">
+        <h1>PassGa PDF</h1>
+        <p>最新のデザインで、あなたのPDFを安全に保護します。</p>
+    </div>
+
+    <div class="passga-card">
+        <div class="upload-box-modern">
+            <div class="icon"><i class="fas fa-cloud-upload-alt"></i></div>
+            <p><strong>ファイルをドラッグ＆ドロップ</strong><br>または</p>
+            <button class="btn-secondary">ファイルを選択</button>
+        </div>
+    </div>
+    
+    <div class="passga-card">
+         <div class="form-group-modern">
+            <label for="viewPassword">閲覧パスワード</label>
+            <input type="password" id="viewPassword" class="form-control-modern" placeholder="••••••••">
+        </div>
+        <div class="form-group-modern">
+            <label for="editPassword">編集パスワード (任意)</label>
+            <input type="password" id="editPassword" class="form-control-modern" placeholder="••••••••">
+        </div>
+    </div>
+    
+    <a href="#" class="btn-modern">
+        <i class="fas fa-lock"></i> PDFを保護する
+    </a>
+</div>
+
+<script src="https://kit.fontawesome.com/your-kit-code.js" crossorigin="anonymous"></script>
