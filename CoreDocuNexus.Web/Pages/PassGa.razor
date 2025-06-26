@@ -1,11 +1,9 @@
 ﻿@page "/pass-ga"
 @using Microsoft.AspNetCore.Components.Forms
-@using System.Text.Json
-@using System.Text
-@using jp.in4a.CoreDocuNexus.Contracts.Http.AddPasswordToPdf
+@using jp.in4a.CoreDocuNexus.Web.Services
 @using MudBlazor
 @inject IJSRuntime JSRuntime
-@inject HttpClient Http
+@inject PdfPasswordService PdfPasswordService
 @inject jp.in4a.CoreDocuNexus.Web.AppSettings.RootSettings Settings
 @inject ISnackbar Snackbar
 
@@ -120,10 +118,10 @@
 
 
         <!-- 処理中オーバーレイ -->
-        <MudOverlay Visible="isProcessing" DarkBackground="true" Absolute="true" ZIndex="2">
+        <MudOverlay Visible="uiState.IsProcessing" DarkBackground="true" Absolute="true" ZIndex="2">
             <div class="d-flex flex-column align-center">
                 <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
-                <MudText Typo="Typo.h6" Class="mt-4" Style="color: white;">@processingMessage</MudText>
+                <MudText Typo="Typo.h6" Class="mt-4" Style="color: white;">@uiState.ProcessingMessage</MudText>
             </div>
         </MudOverlay>
         <div class="passga-header">
@@ -131,18 +129,20 @@
             <p>「パスッと設定、ガシッとガード」をコンセプトに、PDFのパスワード管理をシンプルにします。</p>
         </div>
 
-        @* <div class="upload-box-minimal"> *@
 
         <MudFileUpload T="IReadOnlyList<IBrowserFile>" @ref="@_fileUpload"
                        OnFilesChanged="OnInputFileChanged"
-                       Disabled="isProcessing"
+                       Disabled="@(uiState.IsProcessing || _fileList.Count > 0)"
                        MaxFileSize="MaxSizeByte" Accept=".pdf" Hidden="@false"
+                       InputClass="absolute mud-width-full mud-height-full overflow-hidden z-10" 
                        InputStyle="opacity:0"
                        tabindex="-1"
                        @ondragenter="@SetDragClass" @ondrop="@ClearDragClass"
                        @ondragleave="@ClearDragClass" @ondragend="@ClearDragClass">
 
             <ActivatorContent>
+                       @if (_fileList.Count == 0)
+                    {
                 <MudPaper Class="@_dragClass" Elevation="0"
                           Style="
     border: 2px solid #dee2e6; /* 実線 */
@@ -153,26 +153,42 @@
     margin-bottom: 2rem;
     cursor: pointer;">
 
-                    @foreach (var file in _fileList)
-                    {
-                        <MudItem xs="12" sm="6" md="6">
-                            <MudChip T="string" Color="Color.Dark" Text="@(file.Name + "(" + FormatFileSize(file.Size) + ")")" tabindex="-1" />
-                        </MudItem>
-                    }
-
-                    <p>PDFファイルをここにドラッグ＆ドロップ</p>
-                    <MudButton StartIcon="@Icons.Material.Filled.AttachFile" class="btn btn-secondary-minimal" style="width: auto;"
-                               Size="Size.Small" Variant="Variant.Outlined"
-                               OnClick="@OpenFilePickerAsync">
-                        PDFファイルを選択
-                    </MudButton>
-                    <small class="d-block mt-2">※PDFファイルのみ、@(Settings.MaxUploadFileSizeMB.ToString("0.#"))以下のファイルを選択してください</small>
-
-
-                </MudPaper>
+                        <p>PDFファイルをここにドラッグ＆ドロップ</p>
+                        <MudButton StartIcon="@Icons.Material.Filled.AttachFile" class="btn btn-secondary-minimal" style="width: auto;"
+                                   Size="Size.Small" Variant="Variant.Outlined"
+                                   OnClick="@OpenFilePickerAsync">
+                            PDFファイルを選択
+                        </MudButton>
+                        <small class="d-block mt-2">※PDFファイルのみ、@(Settings.MaxUploadFileSizeMB.ToString("0.#"))MB以下のファイルを選択してください</small>
+                    </MudPaper>
+                }
             </ActivatorContent>
-
         </MudFileUpload>
+
+        @if (_fileList.Count > 0)
+        {
+            <MudPaper Class="@_dragClass" Elevation="0"
+                      Style="
+            border: 2px solid #dee2e6; /* 実線 */
+            border-radius: 8px;
+            padding: 3rem 2rem;
+            text-align: center;
+            background-color: #f8f9fa;
+            margin-bottom: 2rem;
+            cursor: pointer;">
+                @foreach (var file in _fileList)
+                {
+                    <MudItem xs="12" sm="6" md="6">
+                        <MudChip T="string" Color="Color.Success" 
+                                 Text="@(file.Name + "(" + FormatFileSize(file.Size) + ")")" tabindex="-1" />
+                    </MudItem>
+                }
+                <MudButton Color="Color.Error" StartIcon="@Icons.Material.Filled.Clear" Variant="Variant.Filled"
+                           OnClick="ClearAsync">
+                    ファイルをクリア
+                </MudButton>
+            </MudPaper>
+        }
 
         <div class="form-section-minimal">
             <h2>パスワード設定</h2>
@@ -185,7 +201,7 @@
                                       Style="width: 100%;font-size: 1rem;border: 1px solid #ced4da;border-radius: 4px;box-sizing: border-box;"
                                       placeholder="半角英数字"
                                       Variant="Variant.Outlined"
-                                      OnBlur="IsExecute" />
+                                       />
                         <small>PDFを開く際に必要なパスワード</small>
                     </div>
                 </div>
@@ -195,8 +211,9 @@
                         <MudTextField @bind-Value="ownerPassword"
                                       InputType="InputType.Password" Elevation="0"
                                       Style="width: 100%;font-size: 1rem;border: 1px solid #ced4da;border-radius: 4px;box-sizing: border-box;"
+                                      placeholder="半角英数字"
                                       Variant="Variant.Outlined"
-                                      OnBlur="IsExecute" />
+                                       />
                         <small>PDF編集時に必要なパスワード</small>
                     </div>
                 </div>
@@ -207,45 +224,73 @@
                    Color="Color.Primary"
                    Variant="Variant.Filled"
                    OnClick="@Upload"
-                   Disabled="@(!isExecuteBtn)"
+                   Disabled="@(_fileList.Count == 0 || (string.IsNullOrWhiteSpace(userPassword) && string.IsNullOrWhiteSpace(ownerPassword)))"
                    Class="btn"
                    Style="color: #fff;background-color: #0d6efd;border-color: #0d6efd;">
             保護されたPDFを作成
         </MudButton>
 
+        <!-- エラーメッセージ表示 -->
+        @if (!string.IsNullOrEmpty(uiState.ErrorMessage))
+        {
+            <MudItem xs="12" sm="12" md="12">
+                <MudAlert Severity="Severity.Error" Class="mt-4">
+                    @uiState.ErrorMessage
+                </MudAlert>
+            </MudItem>
+
+        }
+        <!-- 成功メッセージ表示 -->
+        @if (!string.IsNullOrEmpty(uiState.SuccessMessage))
+        {
+            <MudItem xs="12" sm="12" md="12">
+                <MudAlert Severity="Severity.Success" Class="mt-4">
+                    @uiState.SuccessMessage
+                </MudAlert>
+            </MudItem>
+        }
+
     </div>
 
-    @* </div> *@
 </MudContainer>
 
 @code {
 
-    private void IsExecute()
+    // ファイル関連定数
+    private const string ALLOWED_FILE_TYPE = "application/pdf";
+    private const string ALLOWED_FILE_EXTENSION = ".pdf";
+
+    // ファイル名フォーマット
+    private const string DOWNLOAD_FILENAME_FORMAT = "yyyyMMdd_HHmmss_";
+
+    // エラーメッセージ定数
+    private const string ERROR_FILE_SIZE_EXCEEDED = "ファイルサイズが{0}MBを超えています。{0}MB以下のファイルを選択してください。";
+    private const string ERROR_INVALID_FILE_TYPE = "PDFファイルを選択してください。";
+    private const string ERROR_FILE_SELECTION = "ファイル選択時にエラーが発生しました: {0}";
+    private const string ERROR_UPLOAD_PROCESSING = "パスワード設定処理中にエラーが発生しました: {0}";
+
+    // 処理中メッセージ
+    private const string PROCESSING_MESSAGE = "パスワードを設定しています...";
+
+    // 成功メッセージ
+    private const string SUCCESS_DOWNLOAD = "ダウンロードが完了しました。";
+
+    // UI状態管理用のクラス
+    private class UiState
     {
-        if (_fileList.Count > 0 && (!string.IsNullOrWhiteSpace(userPassword) || !string.IsNullOrEmpty(ownerPassword)))
-        {
-            isExecuteBtn = true; // 実行ボタンを有効化
-            StateHasChanged();
-        }
-        else
-        {
-            isExecuteBtn = false;
-            StateHasChanged();
-        }
+        public bool IsProcessing { get; set; } = false; // 処理中フラグ
+        public string ProcessingMessage { get; set; } = string.Empty; // 処理中メッセージ
+        public string ErrorMessage { get; set; } = string.Empty;      // エラーメッセージ
+        public string SuccessMessage { get; set; } = string.Empty;    // 成功メッセージ        
     }
 
-    private long MaxSizeByte = 1;   // 最大ファイルサイズ（バイト単位）
-    private bool isExecuteBtn = false; // 実行ボタンの有効/無効状態
+    private UiState uiState = new UiState();
 
-    // UI状態管理のプロパティ
-    private bool isProcessing = false;               // 処理中フラグ
-    private string processingMessage = string.Empty; // 処理中メッセージ
-    private string errorMessage = string.Empty;      // エラーメッセージ
-    private string successMessage = string.Empty;    // 成功メッセージ
+    private long MaxSizeByte = 1 * 1024 * 1024;   // 最大ファイルサイズ（バイト単位）
+
 
     private MudFileUpload<IReadOnlyList<IBrowserFile>>? _fileUpload;
     private List<IBrowserFile> _fileList = new();
-    private readonly List<string> _fileNames = new();
 
     //private const string DefaultDragClass = "relative rounded-lg border-2 border-dashed pa-4 mt-4 mud-width-full mud-height-full";
     private const string DefaultDragClass = " ";
@@ -269,7 +314,6 @@
     {
         await (_fileUpload?.ClearAsync() ?? Task.CompletedTask);
         _fileList.Clear();
-        _fileNames.Clear();
         // MudPaperの協調表示 End
         ClearDragClass();
     }
@@ -293,30 +337,26 @@
                 // ファイルサイズチェック（1MB = 1,048,576 bytes）
                 if (file.Size > MaxSizeByte)
                 {
-                    errorMessage = "ファイルサイズが10MBを超えています。10MB以下のファイルを選択してください。";
+                    uiState.ErrorMessage = string.Format(ERROR_FILE_SIZE_EXCEEDED, Settings.MaxUploadFileSizeMB.ToString("0.#"));
                     return;
                 }
                 // PDFファイル形式チェック
                 if (!file.ContentType.Equals("application/pdf", StringComparison.OrdinalIgnoreCase) &&
                     !file.Name.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
                 {
-                    errorMessage = "PDFファイルを選択してください。";
+                    uiState.ErrorMessage = ERROR_INVALID_FILE_TYPE;
                     return;
                 }
                 _fileList.Clear();
                 _fileList.Add(file);
-                _fileNames.Add(file.Name);
                 break;
             }
         }
         catch (Exception ex)
         {
-            errorMessage = $"ファイル選択時にエラーが発生しました: {ex.Message}";
+            uiState.ErrorMessage = $"{ERROR_FILE_SELECTION}: {ex.Message}";
         }
-        finally
-        {
-            IsExecute(); // パスワード入力欄の有効/無効を更新
-        }
+
     }
 
     // ファイルアップロードの処理
@@ -325,101 +365,49 @@
         // ファイルが選択されていない、またはパスワードが設定されていない場合は処理を中止
         if (!IsSelectFile() || !CanSetPassword()) return;
 
+        uiState.IsProcessing = true;
+        // メッセージエリアを初期化
+        uiState.ProcessingMessage = PROCESSING_MESSAGE;
+        ClearMessages();
+        StateHasChanged();
+
         try
         {
-            isProcessing = true;
-            // メッセージエリアを初期化
-            processingMessage = "パスワードを設定しています...";
-            ClearMessages();
-            StateHasChanged();
-
             // ファイルをバイト配列として読み込み
             using var stream = _fileList[0].OpenReadStream(maxAllowedSize: MaxSizeByte);
             var buffer = new byte[_fileList[0].Size];
             await stream.ReadAsync(buffer);
 
-            // リクエスト作成
-            var request = new AddPasswordToPdfRequest
+            // ★サービスを呼び出す★
+            var returnValue = await PdfPasswordService.AddPasswordToPdfAsync(buffer, userPassword, ownerPassword);
+            if (!returnValue.Success)
             {
-                PdfFile = buffer,
-                UserPassword = userPassword,
-                OwnerPassword = ownerPassword
-            };
-
-            var json = JsonSerializer.Serialize(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            // API呼び出し
-            var response = await Http.PostAsync("api/AddPasswordToPdf", content);
-            var responseJson = await response.Content.ReadFromJsonAsync<AddPasswordToPdfResponse>();
-
-            // エラーメッセージが設定されている場合は処理を中止
-            if (!CheckResponse(response, responseJson)) return;
-
-            // 成功メッセージを設定
-            // ブラウザでファイルダウンロードを実行
-            await DownloadFile(responseJson!.PdfFile, DateTime.Now.ToString("yyyyMMdd_HHmmss_") + _fileList[0].Name);
-
+                uiState.ErrorMessage = returnValue.Message;
+                return; 
+            }
+            
+            // 成功した場合の処理
+            var fileName = DateTime.Now.ToString("yyyyMMdd_HHmmss_") + _fileList[0].Name;
+            await DownloadFile(returnValue.PdfFile, fileName);
             Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
-            Snackbar.Add("ダウンロードが完了しました。");
-
+            Snackbar.Add(SUCCESS_DOWNLOAD);
 
         }
         catch (Exception ex)
         {
-            errorMessage = $"パスワード設定処理中にエラーが発生しました: {ex.Message}";
+            uiState.ErrorMessage = $"{ERROR_UPLOAD_PROCESSING}: {ex.Message}";
             return;
         }
         finally
         {
             // 処理中状態を解除
-            isProcessing = false;
-            processingMessage = string.Empty;
+            uiState.IsProcessing = false;
+            uiState.ProcessingMessage = string.Empty;
             StateHasChanged();
         }
     }
 
-    private bool CheckResponse(HttpResponseMessage response, AddPasswordToPdfResponse? responseJson)
-    {
-        // レスポンスがnullまたは成功フラグがfalseの場合はエラー
-        if (response.IsSuccessStatusCode)
-        {
-            if (responseJson == null)
-            {
-                errorMessage = "APIからのレスポンスが無効です。";
-                return false;
-            }
-            if (!responseJson.Success)
-            {
-                errorMessage = $"APIエラー: {responseJson.Message}";
-                return false;
-            }
-
-            //
-            return true;
-        }
-        else
-        {
-            // 400エラーの場合、レスポンスボディにエラー情報が含まれる
-            if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
-            {
-                errorMessage = "400エラー: APIエラー: 無効なリクエストです。";
-                return false;
-            }
-            // 500エラーの場合、レスポンスボディは空
-            else if (response.StatusCode == System.Net.HttpStatusCode.InternalServerError)
-            {
-
-                errorMessage = "500エラー: サーバー内部エラー";
-                return false;
-            }
-            else
-            {
-                errorMessage = $"{(int)response.StatusCode}エラー: {response.ReasonPhrase}";
-                return false;
-            }
-        }
-    }
+    
 
     /// <summary>
     /// ファイルダウンロード処理
@@ -453,8 +441,8 @@
     /// </summary>
     private void ClearMessages()
     {
-        errorMessage = string.Empty;
-        successMessage = string.Empty;
+        uiState.ErrorMessage = string.Empty;
+        uiState.SuccessMessage = string.Empty;
     }
 
     /// <summary>
@@ -480,42 +468,3 @@
         => _dragClass = DefaultDragClass;
 
 }
-
-<hr>
-<div class="passga-container-minimal">
-    <div class="passga-header">
-        <h1>PassGa PDF</h1>
-        <p>「パスッと設定、ガシッとガード」をコンセプトに、PDFのパスワード管理をシンプルにします。</p>
-    </div>
-
-    <div class="upload-box-minimal">
-        <p>PDFファイルをここにドラッグ＆ドロップ</p>
-        <button class="btn btn-secondary-minimal" style="width: auto;">PDFファイルを選択</button>
-        <small class="d-block mt-2">※PDFファイルのみ、10MB以下のファイルを選択してください</small>
-    </div>
-
-    <div class="form-section-minimal">
-        <h2>パスワード設定</h2>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group-minimal">
-                    <label for="viewPassword">閲覧パスワード</label>
-                    <input type="password" id="viewPassword" class="form-control-minimal" placeholder="半角英数字">
-                    <small>PDFを開く際に必要なパスワード</small>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group-minimal">
-                    <label for="editPassword">編集パスワード</label>
-                    <input type="password" id="editPassword" class="form-control-minimal" placeholder="半角英数字">
-                    <small>PDF編集時に必要なパスワード</small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <button class="btn btn-primary-minimal">
-        <i class="fas fa-shield-alt"></i> 保護されたPDFを作成
-    </button>
-</div>
-
