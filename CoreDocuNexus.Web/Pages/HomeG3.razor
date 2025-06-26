@@ -1,132 +1,54 @@
 ﻿@page "/home-g3"
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
+    <MudStack Spacing="4">
 
-<style>
-    /* Dark Mode スタイル */
-    body {
-        background-color: #121212; /* 基調となる黒 */
-        color: #e0e0e0; /* 基本のテキストカラー */
-        font-family: 'Inter', 'Noto Sans JP', 'sans-serif';
-    }
+        @* ヘッダーセクション *@
+        <MudText Typo="Typo.h4" Align="Align.Center">パスガ PDF</MudText>
+        <MudText Typo="Typo.body1" Align="Align.Center">
+            「パスッと設定、ガシッとガード」をコンセプトに、PDFのパスワード管理をシンプルにします。
+        </MudText>
 
-    .passga-container-dark {
-        max-width: 550px;
-        margin: 4rem auto;
-        background-color: #1e1e1e; /* 少し明るい黒 */
-        padding: 3rem;
-        border-radius: 12px;
-        border: 1px solid #333;
-    }
+        @* メインコンテンツエリア *@
+        <MudPaper Class="pa-8" Elevation="3">
+            <MudStack Spacing="6">
 
-    .passga-header-dark h1 {
-        text-align: center;
-        font-size: 2rem;
-        font-weight: 700;
-        color: #ffffff;
-        margin-bottom: 0.5rem;
-    }
-    
-    .passga-header-dark p {
-        text-align: center;
-        font-size: 0.9rem;
-        color: #a0a0a0;
-        margin-bottom: 3rem;
-    }
+                @* ファイルドロップゾーン *@
+                <MudPaper Class="pa-8" Outlined="true" Style="border: 2px dashed var(--mud-palette-lines-default); background-color: transparent;">
+                    <MudStack AlignItems="AlignItems.Center" Spacing="4">
+                        <MudText>PDFファイルをここにドラッグ & ドロップ</MudText>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.UploadFile">
+                            PDFファイルを選択
+                        </MudButton>
+                        <MudText Typo="Typo.caption">※PDFファイルのみ、10MB以下のファイルを選択してください</MudText>
+                    </MudStack>
+                </MudPaper>
 
-    .upload-box-dark {
-        border: 2px dashed #444;
-        border-radius: 8px;
-        padding: 3rem;
-        text-align: center;
-        margin-bottom: 2.5rem;
-        transition: border-color 0.3s;
-    }
+                @* パスワード設定セクション *@
+                <MudStack Spacing="4">
+                    <MudText Typo="Typo.h5">パスワード設定</MudText>
 
-    .upload-box-dark:hover {
-        border-color: #00aaff; /* ホバー時のアクセントカラー */
-    }
-    
-    .upload-box-dark .icon {
-        font-size: 2.5rem;
-        color: #00aaff;
-        margin-bottom: 1rem;
-    }
+                    <MudTextField T="string"
+                                  Label="閲覧パスワード"
+                                  Placeholder="半角英数字"
+                                  Variant="Variant.Outlined"
+                                  HelperText="PDFを開く際に必要なパスワード" />
 
-    .form-group-dark {
-        margin-bottom: 1.5rem;
-    }
+                    <MudTextField T="string"
+                                  Label="編集パスワード"
+                                  Placeholder="半角英数字"
+                                  Variant="Variant.Outlined"
+                                  HelperText="PDF編集時に必要なパスワード" />
+                </MudStack>
 
-    .form-group-dark label {
-        display: block;
-        font-weight: 500;
-        margin-bottom: 0.5rem;
-        color: #c0c0c0;
-    }
+                @* アクションボタン *@
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Size="Size.Large"
+                           FullWidth="true">
+                    保護されたPDFを作成
+                </MudButton>
 
-    .form-control-dark {
-        width: 100%;
-        padding: 0.8rem 1rem;
-        font-size: 1rem;
-        background-color: #2c2c2c;
-        border: 1px solid #444;
-        border-radius: 5px;
-        color: #f0f0f0;
-        transition: border-color 0.3s, box-shadow 0.3s;
-        box-sizing: border-box;
-    }
-    
-    .form-control-dark:focus {
-        outline: none;
-        border-color: #00aaff;
-        box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.2);
-    }
-    
-    .btn-dark {
-        display: block;
-        width: 100%;
-        padding: 0.9rem;
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #fff;
-        background-color: #00aaff;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.2s;
-        text-align: center;
-        text-decoration: none;
-        margin-top: 1.5rem;
-    }
-
-    .btn-dark:hover {
-        background-color: #0095dd;
-    }
-    
-</style>
-
-<div class="passga-container-dark">
-    <div class="passga-header-dark">
-        <h1>PassGa PDF</h1>
-        <p>集中できるダークな空間で、スマートにPDFを保護</p>
-    </div>
-
-    <div class="upload-box-dark">
-        <div class="icon"><i class="fas fa-file-pdf"></i></div>
-        <p>PDFファイルをドラッグ＆ドロップしてください</p>
-    </div>
-    
-    <div class="form-group-dark">
-        <label for="viewPassword">閲覧パスワード</label>
-        <input type="password" id="viewPassword" class="form-control-dark">
-    </div>
-    <div class="form-group-dark">
-        <label for="editPassword">編集パスワード</label>
-        <input type="password" id="editPassword" class="form-control-dark">
-    </div>
-
-    <a href="#" class="btn-dark">
-        <i class="fas fa-shield-virus"></i> PDFを安全に保護
-    </a>
-</div>
-
-
-<script src="https://kit.fontawesome.com/your-kit-code.js" crossorigin="anonymous"></script>
+            </MudStack>
+        </MudPaper>
+    </MudStack>
+</MudContainer>

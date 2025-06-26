@@ -1,509 +1,87 @@
 ﻿@page "/home-c1"
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>パスガ PDF (PassGa PDF)</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f8fafc;
-            color: #1f2937;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1rem;
-        }
-
-        .header {
-            text-align: center;
-            padding: 40px 0;
-            margin-bottom: 2rem;
-        }
-
-        .header-icon {
-            color: #6366f1;
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
-
-        .header-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #1f2937;
-            letter-spacing: -0.025em;
-            margin-bottom: 12px;
-        }
-
-        .header-subtitle {
-            font-size: 1.25rem;
-            color: #6b7280;
-            font-weight: 400;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .main-card {
-            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-            border-radius: 24px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            border: 1px solid #e2e8f0;
-            position: relative;
-            overflow: hidden;
-            padding: 2rem;
-        }
-
-        .upload-area {
-            border: 2px dashed #cbd5e1;
-            background: linear-gradient(135deg, #f1f5f9 0%, #ffffff 100%);
-            border-radius: 16px;
-            padding: 48px 24px;
-            min-height: 280px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            margin-bottom: 2rem;
-            cursor: pointer;
-        }
-
-            .upload-area:hover {
-                border-color: #6366f1;
-                background: linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 100%);
-            }
-
-            .upload-area.drag-over {
-                border-color: #6366f1;
-                background: linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 100%);
-            }
-
-        .upload-icon {
-            color: #6366f1;
-            font-size: 64px;
-            margin-bottom: 24px;
-            opacity: 0.8;
-        }
-
-        .upload-title {
-            font-size: 1.5rem;
-            color: #374151;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 12px;
-        }
-
-        .upload-subtitle {
-            font-size: 1rem;
-            color: #6b7280;
-            text-align: center;
-            margin-bottom: 24px;
-        }
-
-        .file-input {
-            display: none;
-        }
-
-        .btn {
-            padding: 16px 32px;
-            font-size: 16px;
-            font-weight: 600;
-            border-radius: 12px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            color: white;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-            .btn-primary:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.2);
-            }
-
-        .btn-success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            padding: 16px 48px;
-            font-size: 18px;
-        }
-
-            .btn-success:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.2);
-            }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .file-chip {
-            background: #6366f1;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 500;
-            margin: 4px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .upload-note {
-            font-size: 0.875rem;
-            color: #9ca3af;
-            text-align: center;
-            margin-top: 16px;
-        }
-
-        .password-section {
-            background: #ffffff;
-            border-radius: 16px;
-            padding: 32px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            color: #374151;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .section-icon {
-            color: #6366f1;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-label {
-            display: block;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 8px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s ease;
-            background: white;
-        }
-
-            .form-input:focus {
-                outline: none;
-                border-color: #6366f1;
-                box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-            }
-
-        .form-helper {
-            font-size: 0.875rem;
-            color: #6b7280;
-            margin-top: 4px;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .alert {
-            padding: 16px;
-            border-radius: 12px;
-            margin-top: 1rem;
-        }
-
-        .alert-error {
-            background: #fef2f2;
-            border-left: 4px solid #ef4444;
-            color: #dc2626;
-        }
-
-        .alert-success {
-            background: #f0fdf4;
-            border-left: 4px solid #10b981;
-            color: #059669;
-        }
-
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-            .overlay.show {
-                display: flex;
-            }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f4f6;
-            border-top: 4px solid #6366f1;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        .overlay-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .overlay-text {
-            color: white;
-            font-size: 1.25rem;
-            font-weight: 500;
-        }
-
-    </style>
-</head>
-<body>
-    <div class="container">
-        <!-- ヘッダーセクション -->
-        <header class="header">
-            <i class="fas fa-shield-alt header-icon"></i>
-            <h1 class="header-title">パスガ PDF</h1>
-            <p class="header-subtitle">そのPDF、パスガ済み？パスッと決めて、ガシッと守る。</p>
-        </header>
-
-        <!-- メインコンテンツ -->
-        <main class="main-card">
-            <!-- 処理中オーバーレイ -->
-            <div class="overlay" id="overlay">
-                <div class="overlay-content">
-                    <div class="spinner"></div>
-                    <div class="overlay-text" id="processingMessage">処理中...</div>
-                </div>
-            </div>
-
-            <!-- ファイルアップロードエリア -->
-            <section>
-                <div class="upload-area" id="uploadArea">
-                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                    <h2 class="upload-title">PDFファイルをドラッグ＆ドロップ</h2>
-                    <p class="upload-subtitle">または下のボタンからファイルを選択してください</p>
-
-                    <div id="fileList" class="file-list"></div>
-
-                    <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
-                        <i class="fas fa-paperclip"></i>
-                        ファイルを選択
-                    </button>
-
-                    <p class="upload-note">PDFファイルのみ、10MB以下</p>
-
-                    <input type="file" id="fileInput" class="file-input" accept=".pdf" multiple>
-                </div>
-            </section>
-
-            <!-- パスワード設定エリア -->
-            <section class="password-section">
-                <h2 class="section-title">
-                    <i class="fas fa-lock section-icon"></i>
-                    パスワード設定
-                </h2>
-
-                <form id="passwordForm">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label class="form-label" for="userPassword">閲覧パスワード</label>
-                            <input type="password" id="userPassword" class="form-input" placeholder="PDFを開く際に必要なパスワード">
-                            <div class="form-helper">PDFを開く際に必要なパスワード</div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="ownerPassword">編集パスワード</label>
-                            <input type="password" id="ownerPassword" class="form-input" placeholder="PDF編集時に必要なパスワード">
-                            <div class="form-helper">PDF編集時に必要なパスワード</div>
-                        </div>
-                    </div>
-
-                    <div class="text-center">
-                        <button type="button" class="btn btn-success" id="generateBtn" disabled>
-                            <i class="fas fa-shield-alt"></i>
-                            保護されたPDFを作成
-                        </button>
-                    </div>
-
-                    <!-- メッセージ表示エリア -->
-                    <div id="messageArea"></div>
-                </form>
-            </section>
-        </main>
-    </div>
-
-    <script>
-        let selectedFiles = [];
-
-        // DOM要素の取得
-        const uploadArea = document.getElementById('uploadArea');
-        const fileInput = document.getElementById('fileInput');
-        const fileList = document.getElementById('fileList');
-        const generateBtn = document.getElementById('generateBtn');
-        const userPasswordInput = document.getElementById('userPassword');
-        const ownerPasswordInput = document.getElementById('ownerPassword');
-        const overlay = document.getElementById('overlay');
-        const processingMessage = document.getElementById('processingMessage');
-        const messageArea = document.getElementById('messageArea');
-
-        // ドラッグ&ドロップイベント
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('drag-over');
-        });
-
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('drag-over');
-        });
-
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('drag-over');
-
-            const files = Array.from(e.dataTransfer.files).filter(file => file.type === 'application/pdf');
-            handleFiles(files);
-        });
-
-        // ファイル選択イベント
-        fileInput.addEventListener('change', (e) => {
-            const files = Array.from(e.target.files);
-            handleFiles(files);
-        });
-
-        // ファイル処理
-        function handleFiles(files) {
-            selectedFiles = files;
-            displayFiles();
-            checkExecuteButton();
-        }
-
-        // ファイル表示
-        function displayFiles() {
-            fileList.innerHTML = '';
-            selectedFiles.forEach(file => {
-                const chip = document.createElement('div');
-                chip.className = 'file-chip';
-                chip.innerHTML = `
-                    <i class="fas fa-file-pdf"></i>
-                    ${file.name} (${formatFileSize(file.size)})
-                `;
-                fileList.appendChild(chip);
-            });
-        }
-
-        // ファイルサイズフォーマット
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        // 実行ボタンの状態チェック
-        function checkExecuteButton() {
-            const hasFiles = selectedFiles.length > 0;
-            const hasPassword = userPasswordInput.value.trim() || ownerPasswordInput.value.trim();
-            generateBtn.disabled = !(hasFiles && hasPassword);
-        }
-
-        // パスワード入力イベント
-        userPasswordInput.addEventListener('input', checkExecuteButton);
-        ownerPasswordInput.addEventListener('input', checkExecuteButton);
-
-        // PDF生成ボタン
-        generateBtn.addEventListener('click', async () => {
-            if (selectedFiles.length === 0) {
-                showMessage('error', 'ファイルを選択してください。');
-                return;
-            }
-
-            if (!userPasswordInput.value.trim() && !ownerPasswordInput.value.trim()) {
-                showMessage('error', 'パスワードを設定してください。');
-                return;
-            }
-
-            showProcessing('PDFを保護しています...');
-
-            // シミュレートされた処理（実際のAPIコールに置き換え）
-            setTimeout(() => {
-                hideProcessing();
-                showMessage('success', '保護されたPDFが正常に作成されました。ダウンロードが開始されます。');
-
-                // 実際の実装では、ここでサーバーにファイルをアップロードし、
-                // 保護されたPDFをダウンロードする処理を行います
-            }, 2000);
-        });
-
-        // 処理中表示
-        function showProcessing(message) {
-            processingMessage.textContent = message;
-            overlay.classList.add('show');
-        }
-
-        // 処理中非表示
-        function hideProcessing() {
-            overlay.classList.remove('show');
-        }
-
-        // メッセージ表示
-        function showMessage(type, message) {
-            const alertClass = type === 'error' ? 'alert-error' : 'alert-success';
-            messageArea.innerHTML = `
-                <div class="alert ${alertClass}">
-                    <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i>
-                    ${message}
-                </div>
-            `;
-
-            // 3秒後にメッセージを消去
-            setTimeout(() => {
-                messageArea.innerHTML = '';
-            }, 5000);
-        }
-    </script>
-</body>
-</html>
+@using MudBlazor
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
+    <MudPaper Class="pa-6" Elevation="2">
+        <!-- タイトル -->
+        <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-2" Style="font-weight: bold;">
+            パスガ PDF
+        </MudText>
+
+        <!-- 説明文 -->
+        <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-6">
+            「パスワードと設定、ガジェットカード」をコンセプトに、PDFのパスワード管理をシンプルにします。
+        </MudText>
+
+        <!-- PDFアップロード領域 -->
+        <MudPaper Class="pa-8 mb-6" Style="border: 2px dashed #e0e0e0; text-align: center; background-color: #fafafa;">
+            <MudText Typo="Typo.body1" Class="mb-4" Color="Color.Secondary">
+                PDFファイルをここにドラッグ&ドロップ
+            </MudText>
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       StartIcon="Icons.Material.Filled.UploadFile"
+                       Class="mb-3">
+                PDFファイルを選択
+            </MudButton>
+
+            <MudText Typo="Typo.caption" Color="Color.Error">
+                ※PDFファイルのみ、10MB以下のファイルを選択してください
+            </MudText>
+        </MudPaper>
+
+        <!-- パスワード設定 -->
+        <MudText Typo="Typo.h6" Class="mb-4" Style="font-weight: bold;">
+            パスワード設定
+        </MudText>
+
+        <!-- 開始パスワード -->
+        <MudText Typo="Typo.subtitle2" Class="mb-2" Style="font-weight: bold;">
+            開始パスワード
+        </MudText>
+        <MudTextField @bind-Value="openPassword"
+                      Label=""
+                      Placeholder="半角英数字"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      Class="mb-2"
+                      InputType="InputType.Password" />
+        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-4">
+            PDFを開く際に必要なパスワード
+        </MudText>
+
+        <!-- 編集パスワード -->
+        <MudText Typo="Typo.subtitle2" Class="mb-2" Style="font-weight: bold;">
+            編集パスワード
+        </MudText>
+        <MudTextField @bind-Value="editPassword"
+                      Label=""
+                      Placeholder="半角英数字"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      Class="mb-2"
+                      InputType="InputType.Password" />
+        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-6">
+            PDF編集時に必要なパスワード
+        </MudText>
+
+        <!-- 作成ボタン -->
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   Size="Size.Large"
+                   FullWidth="true"
+                   StartIcon="Icons.Material.Filled.Security"
+                   Class="py-3">
+            保護されたPDFを作成
+        </MudButton>
+    </MudPaper>
+</MudContainer>
+
+@code
+{
+
+
+    private string openPassword = "";
+    private string editPassword = "";
+}
