@@ -1,4 +1,5 @@
 ﻿using jp.in4a.CoreDocuNexus.Shared.Dto;
+using jp.in4a.CoreDocuNexus.Shared.Dto.Pdf;
 using PdfSharpCore.Pdf.IO;
 using PdfSharpCore.Pdf.Security;
 using System;
@@ -19,7 +20,7 @@ namespace jp.in4a.CoreDocuNexus.Infrastructure.Pdf
         /// <param name="userPassword"></param>
         /// <param name="ownerPassword"></param>
         /// <returns></returns>
-        public Task<Result<byte[]>> SetPasswordAsync(byte[] pdfData, string userPassword, string ownerPassword)
+        public Task<Result<byte[]>> SetPasswordAsync(byte[] pdfData, string userPassword, string ownerPassword,DocumentPermissions permissions)
         {
 
             // 基本的なチェックを行う
@@ -39,6 +40,15 @@ namespace jp.in4a.CoreDocuNexus.Infrastructure.Pdf
             securitySettings.DocumentSecurityLevel = PdfDocumentSecurityLevel.Encrypted128Bit; 
             securitySettings.UserPassword = userPassword;
             securitySettings.OwnerPassword = ownerPassword;
+            securitySettings.PermitPrint = permissions.AllowPrinting;
+            securitySettings.PermitExtractContent = permissions.AllowCopying;
+            securitySettings.PermitFormsFill = permissions.AllowFormFieldFilling;
+            securitySettings.PermitModifyDocument = permissions.AllowDocumentChanges;
+            securitySettings.PermitAnnotations = permissions.AllowAnnotationModification;
+            securitySettings.PermitAccessibilityExtractContent = permissions.AllowContentExtractionForAccessibility;
+            securitySettings.PermitAssembleDocument = permissions.AllowDocumentAssembly;
+            securitySettings.PermitFullQualityPrint = permissions.AllowPermitFullQualityPrint;
+
 
             // 4. 新しいメモリストリームに変更後のPDFを保存する
             using (var outputStream = new MemoryStream())

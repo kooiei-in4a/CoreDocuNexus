@@ -1,4 +1,5 @@
-﻿using System;
+﻿using jp.in4a.CoreDocuNexus.Shared.Dto.Pdf;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,5 +27,7 @@ namespace jp.in4a.CoreDocuNexus.Contracts.Http.AddPasswordToPdf
         /// 権限の変更など、PDFのセキュリティ設定を変更する際に要求される所有者パスワード。
         /// </summary>
         public string OwnerPassword { get; set; } = string.Empty;
+
+        public DocumentPermissions permissions { get; set; } = new DocumentPermissions();
     }
 }

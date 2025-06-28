@@ -24,7 +24,7 @@ namespace jp.in4a.CoreDocuNexus.Features.PdfSetPassword
             try
             {
                 // パスワードを設定する
-                return await _pdfEngine.SetPasswordAsync(request.PdfFile, request.UserPassword, request.OwnerPassword);
+                return await _pdfEngine.SetPasswordAsync(request.PdfFile, request.UserPassword, request.OwnerPassword,request.permissions);
             }
             catch (Exception ex)
             {

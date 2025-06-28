@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Components.Forms
+@using jp.in4a.CoreDocuNexus.Shared.Dto.Pdf
 @using jp.in4a.CoreDocuNexus.Web.Services
 @using MudBlazor
 @inject IJSRuntime JSRuntime
@@ -18,15 +19,34 @@
 
 <MudContainer>
     <div class="passga-container-minimal">
+        <!-- エラーメッセージ表示 -->
+        @if (!string.IsNullOrEmpty(uiState.ErrorMessage))
+        {
+            <MudItem xs="12" sm="12" md="12">
+                <MudAlert Severity="Severity.Error" Class="mt-4">
+                    @uiState.ErrorMessage
+                </MudAlert>
+            </MudItem>
 
+        }
+        <!-- 成功メッセージ表示 -->
+        @if (!string.IsNullOrEmpty(uiState.SuccessMessage))
+        {
+            <MudItem xs="12" sm="12" md="12">
+                <MudAlert Severity="Severity.Success" Class="mt-4">
+                    @uiState.SuccessMessage
+                </MudAlert>
+            </MudItem>
+        }
 
         <!-- 処理中オーバーレイ -->
-        <MudOverlay Visible="uiState.IsProcessing" DarkBackground="true" Absolute="true" ZIndex="2">
+        <MudOverlay Visible="uiState.IsProcessing" DarkBackground="true" Absolute="false" ZIndex="2">
             <div class="d-flex flex-column align-center">
                 <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
                 <MudText Typo="Typo.h6" Class="mt-4" Style="color: white;">@uiState.ProcessingMessage</MudText>
             </div>
         </MudOverlay>
+
         <div class="passga-header">
             <h1>PassGa PDF</h1>
             <p>「パスッと設定、ガシッとガード」をコンセプトに、PDFのパスワード管理をシンプルにします。</p>
@@ -48,13 +68,13 @@
                 {
                     <MudPaper Class="@_dragClass" Elevation="0"
                               Style="
-        border: 2px solid #dee2e6; /* 実線 */
-        border-radius: 8px;
-        padding: 3rem 2rem;
-        text-align: center;
-        background-color: #f8f9fa;
-        margin-bottom: 2rem;
-        cursor: pointer;">
+            border: 2px solid #dee2e6; /* 実線 */
+            border-radius: 8px;
+            padding: 3rem 2rem;
+            text-align: center;
+            background-color: #f8f9fa;
+            margin-bottom: 2rem;
+            cursor: pointer;">
 
                         <p>PDFファイルをここにドラッグ＆ドロップ</p>
                         <MudButton StartIcon="@Icons.Material.Filled.AttachFile" class="btn btn-secondary-minimal" style="width: auto;"
@@ -72,13 +92,13 @@
         {
             <MudPaper Class="@_dragClass" Elevation="0"
                       Style="
-                border: 2px solid #dee2e6; /* 実線 */
-                border-radius: 8px;
-                padding: 3rem 2rem;
-                text-align: center;
-                background-color: #f8f9fa;
-                margin-bottom: 2rem;
-                cursor: pointer;">
+                    border: 2px solid #dee2e6; /* 実線 */
+                    border-radius: 8px;
+                    padding: 3rem 2rem;
+                    text-align: center;
+                    background-color: #f8f9fa;
+                    margin-bottom: 2rem;
+                    cursor: pointer;">
                 @foreach (var file in _fileList)
                 {
                     <MudItem xs="12" sm="12" md="12">
@@ -101,7 +121,7 @@
                     <div class="form-group-minimal">
                         <label for="viewPassword">閲覧パスワード</label>
                         <MudTextField @bind-Value="userPassword"
-                                      InputType="InputType.Password" 
+                                      InputType="InputType.Password"
                                       Style="width: 100%;font-size: 1rem;border: 1px solid #ced4da;border-radius: 4px;box-sizing: border-box;"
                                       placeholder="半角英数字"
                                       Variant="Variant.Outlined" />
@@ -112,12 +132,62 @@
                     <div class="form-group-minimal">
                         <label for="editPassword">編集パスワード</label>
                         <MudTextField @bind-Value="ownerPassword"
-                                      InputType="InputType.Password" 
+                                      InputType="InputType.Password"
                                       Style="width: 100%;font-size: 1rem;border: 1px solid #ced4da;border-radius: 4px;box-sizing: border-box;"
                                       placeholder="半角英数字"
                                       Variant="Variant.Outlined" />
                         <small>PDF編集時に必要なパスワード</small>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="permission-settings-container">
+            <div class="permission-title-container">
+                <h3>詳細な権限設定</h3>
+                <p>「編集パスワード」を設定した場合に有効になります。許可したい操作をオンにしてください。</p>
+            </div>
+
+            <div class="permission-switches">
+
+                <div class="form-switch-wrapper">
+                    <label class="form-switch-label">印刷</label>
+                    <MudSwitch @bind-value="@permissions.AllowPrinting" Color="Color.Primary" />
+                </div>
+
+                <div class="form-switch-wrapper sub-setting">
+                    <label class="form-switch-label">高品質での印刷</label>
+                    <MudSwitch @bind-value="@permissions.AllowPermitFullQualityPrint" Color="Color.Primary" Disabled="@(!permissions.AllowPrinting)" />
+                </div>
+
+                <div class="form-switch-wrapper">
+                    <label class="form-switch-label">内容のコピー</label>
+                    <MudSwitch @bind-value="@permissions.AllowCopying" Color="Color.Primary" />
+                </div>
+
+                <div class="form-switch-wrapper">
+                    <label class="form-switch-label">文書の変更</label>
+                    <MudSwitch @bind-value="@permissions.AllowDocumentChanges" Color="Color.Primary" />
+                </div>
+
+                <div class="form-switch-wrapper">
+                    <label class="form-switch-label">フォームフィールドの入力</label>
+                    <MudSwitch @bind-value="@permissions.AllowFormFieldFilling" Color="Color.Primary" />
+                </div>
+
+                <div class="form-switch-wrapper">
+                    <label class="form-switch-label">注釈の追加と修正</label>
+                    <MudSwitch @bind-value="@permissions.AllowAnnotationModification" Color="Color.Primary" />
+                </div>
+
+                <div class="form-switch-wrapper">
+                    <label class="form-switch-label">ページの挿入・削除・回転</label>
+                    <MudSwitch @bind-value="@permissions.AllowDocumentAssembly" Color="Color.Primary" />
+                </div>
+
+                <div class="form-switch-wrapper">
+                    <label class="form-switch-label">スクリーンリーダーのためのテキストアクセス</label>
+                    <MudSwitch @bind-value="@permissions.AllowContentExtractionForAccessibility" Color="Color.Primary" />
                 </div>
             </div>
         </div>
@@ -132,25 +202,7 @@
             保護されたPDFを作成
         </MudButton>
 
-        <!-- エラーメッセージ表示 -->
-        @if (!string.IsNullOrEmpty(uiState.ErrorMessage))
-        {
-            <MudItem xs="12" sm="12" md="12">
-                <MudAlert Severity="Severity.Error" Class="mt-4">
-                    @uiState.ErrorMessage
-                </MudAlert>
-            </MudItem>
-
-        }
-        <!-- 成功メッセージ表示 -->
-        @if (!string.IsNullOrEmpty(uiState.SuccessMessage))
-        {
-            <MudItem xs="12" sm="12" md="12">
-                <MudAlert Severity="Severity.Success" Class="mt-4">
-                    @uiState.SuccessMessage
-                </MudAlert>
-            </MudItem>
-        }
+        
 
     </div>
 
@@ -187,6 +239,18 @@
     }
 
     private UiState uiState = new UiState();
+
+    private DocumentPermissions permissions = new DocumentPermissions
+    {
+        AllowPrinting = true,
+        AllowPermitFullQualityPrint = true,
+        AllowCopying = true,
+        AllowDocumentChanges = true,
+        AllowFormFieldFilling = true,
+        AllowAnnotationModification = true,
+        AllowDocumentAssembly = true,
+        AllowContentExtractionForAccessibility = true
+    };
 
     private long MaxSizeByte = 1 * 1024 * 1024;   // 最大ファイルサイズ（バイト単位）
 
@@ -281,7 +345,7 @@
             await stream.ReadAsync(buffer);
 
             // ★サービスを呼び出す★
-            var returnValue = await PdfPasswordService.AddPasswordToPdfAsync(buffer, userPassword, ownerPassword);
+            var returnValue = await PdfPasswordService.AddPasswordToPdfAsync(buffer, userPassword, ownerPassword,permissions);
             if (!returnValue.Success)
             {
                 uiState.ErrorMessage = returnValue.Message;

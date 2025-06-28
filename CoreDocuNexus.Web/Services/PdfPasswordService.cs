@@ -1,4 +1,5 @@
 ﻿using jp.in4a.CoreDocuNexus.Contracts.Http.AddPasswordToPdf;
+using jp.in4a.CoreDocuNexus.Shared.Dto.Pdf;
 using Microsoft.VisualBasic;
 using System.Net.Http.Json;
 using System.Text;
@@ -24,14 +25,15 @@ namespace jp.in4a.CoreDocuNexus.Web.Services
             _httpClient = httpClient;
         }
 
-        public async Task<ReturnValue> AddPasswordToPdfAsync(byte[] pdfFile, string userPassword, string ownerPassword)
+        public async Task<ReturnValue> AddPasswordToPdfAsync(byte[] pdfFile, string userPassword, string ownerPassword,DocumentPermissions permissions)
         {
             // リクエスト作成ロジックをここに移動
             var request = new AddPasswordToPdfRequest
             {
                 PdfFile = pdfFile,
                 UserPassword = userPassword,
-                OwnerPassword = ownerPassword
+                OwnerPassword = ownerPassword,
+                permissions = permissions
             };
 
             var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
