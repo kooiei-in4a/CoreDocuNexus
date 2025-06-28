@@ -16,7 +16,7 @@
         <div class="copyright">
             &copy; 2025 IN4A.LLC. All Rights Reserved.
         </div>
-@if(Settings.IsDevelopment)
+@if(Settings.IsDevelopment || Settings.IsStaging)
 {
         <div class="development-info">
                 <span>EnvironmentName:[@(Settings.EnvironmentName)]</span>
