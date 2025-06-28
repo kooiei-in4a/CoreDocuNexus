@@ -1,0 +1,87 @@
+﻿@page "/home-c1"
+@using MudBlazor
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
+    <MudPaper Class="pa-6" Elevation="2">
+        <!-- タイトル -->
+        <MudText Typo="Typo.h4" Color="Color.Primary" Class="mb-2" Style="font-weight: bold;">
+            パスガ PDF
+        </MudText>
+
+        <!-- 説明文 -->
+        <MudText Typo="Typo.body1" Color="Color.Secondary" Class="mb-6">
+            「パスワードと設定、ガジェットカード」をコンセプトに、PDFのパスワード管理をシンプルにします。
+        </MudText>
+
+        <!-- PDFアップロード領域 -->
+        <MudPaper Class="pa-8 mb-6" Style="border: 2px dashed #e0e0e0; text-align: center; background-color: #fafafa;">
+            <MudText Typo="Typo.body1" Class="mb-4" Color="Color.Secondary">
+                PDFファイルをここにドラッグ&ドロップ
+            </MudText>
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       StartIcon="Icons.Material.Filled.UploadFile"
+                       Class="mb-3">
+                PDFファイルを選択
+            </MudButton>
+
+            <MudText Typo="Typo.caption" Color="Color.Error">
+                ※PDFファイルのみ、10MB以下のファイルを選択してください
+            </MudText>
+        </MudPaper>
+
+        <!-- パスワード設定 -->
+        <MudText Typo="Typo.h6" Class="mb-4" Style="font-weight: bold;">
+            パスワード設定
+        </MudText>
+
+        <!-- 開始パスワード -->
+        <MudText Typo="Typo.subtitle2" Class="mb-2" Style="font-weight: bold;">
+            開始パスワード
+        </MudText>
+        <MudTextField @bind-Value="openPassword"
+                      Label=""
+                      Placeholder="半角英数字"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      Class="mb-2"
+                      InputType="InputType.Password" />
+        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-4">
+            PDFを開く際に必要なパスワード
+        </MudText>
+
+        <!-- 編集パスワード -->
+        <MudText Typo="Typo.subtitle2" Class="mb-2" Style="font-weight: bold;">
+            編集パスワード
+        </MudText>
+        <MudTextField @bind-Value="editPassword"
+                      Label=""
+                      Placeholder="半角英数字"
+                      Variant="Variant.Outlined"
+                      Margin="Margin.Dense"
+                      Class="mb-2"
+                      InputType="InputType.Password" />
+        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-6">
+            PDF編集時に必要なパスワード
+        </MudText>
+
+        <!-- 作成ボタン -->
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   Size="Size.Large"
+                   FullWidth="true"
+                   StartIcon="Icons.Material.Filled.Security"
+                   Class="py-3">
+            保護されたPDFを作成
+        </MudButton>
+    </MudPaper>
+</MudContainer>
+
+@code
+{
+
+
+    private string openPassword = "";
+    private string editPassword = "";
+}

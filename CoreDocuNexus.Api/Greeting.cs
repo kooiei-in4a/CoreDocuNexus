@@ -1,4 +1,4 @@
-using jp.in4a.CoreDocuNexus.Contracts.Greetings;
+using jp.in4a.CoreDocuNexus.Contracts.Http.Greetings;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;

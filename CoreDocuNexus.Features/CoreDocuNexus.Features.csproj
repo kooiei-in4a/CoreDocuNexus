@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	  <RootNamespace>jp.in4a.CoreDocuNexus.Features</RootNamespace>
+	  <AssemblyName>jp.in4a.CoreDocuNexus.Features</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CoreDocuNexus.Contracts\CoreDocuNexus.Contracts.csproj" />
+    <ProjectReference Include="..\CoreDocuNexus.Infrastructure\CoreDocuNexus.Infrastructure.csproj" />
+    <ProjectReference Include="..\CoreDocuNexus.Shared\CoreDocuNexus.Shared.csproj" />
+  </ItemGroup>
+
+</Project>

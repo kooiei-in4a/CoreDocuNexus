@@ -1,0 +1,54 @@
+﻿@page "/home-g3"
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
+    <MudStack Spacing="4">
+
+        @* ヘッダーセクション *@
+        <MudText Typo="Typo.h4" Align="Align.Center">パスガ PDF</MudText>
+        <MudText Typo="Typo.body1" Align="Align.Center">
+            「パスッと設定、ガシッとガード」をコンセプトに、PDFのパスワード管理をシンプルにします。
+        </MudText>
+
+        @* メインコンテンツエリア *@
+        <MudPaper Class="pa-8" Elevation="3">
+            <MudStack Spacing="6">
+
+                @* ファイルドロップゾーン *@
+                <MudPaper Class="pa-8" Outlined="true" Style="border: 2px dashed var(--mud-palette-lines-default); background-color: transparent;">
+                    <MudStack AlignItems="AlignItems.Center" Spacing="4">
+                        <MudText>PDFファイルをここにドラッグ & ドロップ</MudText>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.UploadFile">
+                            PDFファイルを選択
+                        </MudButton>
+                        <MudText Typo="Typo.caption">※PDFファイルのみ、10MB以下のファイルを選択してください</MudText>
+                    </MudStack>
+                </MudPaper>
+
+                @* パスワード設定セクション *@
+                <MudStack Spacing="4">
+                    <MudText Typo="Typo.h5">パスワード設定</MudText>
+
+                    <MudTextField T="string"
+                                  Label="閲覧パスワード"
+                                  Placeholder="半角英数字"
+                                  Variant="Variant.Outlined"
+                                  HelperText="PDFを開く際に必要なパスワード" />
+
+                    <MudTextField T="string"
+                                  Label="編集パスワード"
+                                  Placeholder="半角英数字"
+                                  Variant="Variant.Outlined"
+                                  HelperText="PDF編集時に必要なパスワード" />
+                </MudStack>
+
+                @* アクションボタン *@
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Size="Size.Large"
+                           FullWidth="true">
+                    保護されたPDFを作成
+                </MudButton>
+
+            </MudStack>
+        </MudPaper>
+    </MudStack>
+</MudContainer>

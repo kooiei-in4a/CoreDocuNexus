@@ -1,0 +1,434 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Components.Forms
+@using jp.in4a.CoreDocuNexus.Shared.Dto.Pdf
+@using jp.in4a.CoreDocuNexus.Web.Services
+@using MudBlazor
+@inject IJSRuntime JSRuntime
+@inject PdfPasswordService PdfPasswordService
+@inject jp.in4a.CoreDocuNexus.Web.AppSettings.RootSettings Settings
+@inject ISnackbar Snackbar
+
+<style>
+    /* Minimal & Clean スタイル */
+    body {
+        background-color: #f8f9fa; /* わずかにグレーの背景 */
+        font-family: 'Segoe UI', 'Meiryo', 'Hiragino Sans', 'sans-serif';
+        color: #212529;
+    }
+</style>
+
+<MudContainer>
+    <div class="passga-container-minimal">
+        <!-- エラーメッセージ表示 -->
+        @if (!string.IsNullOrEmpty(uiState.ErrorMessage))
+        {
+            <MudItem xs="12" sm="12" md="12">
+                <MudAlert Severity="Severity.Error" Class="mt-4">
+                    @uiState.ErrorMessage
+                </MudAlert>
+            </MudItem>
+
+        }
+        <!-- 成功メッセージ表示 -->
+        @if (!string.IsNullOrEmpty(uiState.SuccessMessage))
+        {
+            <MudItem xs="12" sm="12" md="12">
+                <MudAlert Severity="Severity.Success" Class="mt-4">
+                    @uiState.SuccessMessage
+                </MudAlert>
+            </MudItem>
+        }
+
+        <!-- 処理中オーバーレイ -->
+        <MudOverlay Visible="uiState.IsProcessing" DarkBackground="true" Absolute="false" ZIndex="2">
+            <div class="d-flex flex-column align-center">
+                <MudProgressCircular Color="Color.Primary" Indeterminate="true" Size="Size.Large" />
+                <MudText Typo="Typo.h6" Class="mt-4" Style="color: white;">@uiState.ProcessingMessage</MudText>
+            </div>
+        </MudOverlay>
+
+        <div class="passga-header">
+            <h1>PassGa PDF</h1>
+            <p>「パスッと設定、ガシッとガード」をコンセプトに、PDFのパスワード管理をシンプルにします。</p>
+        </div>
+
+
+        <MudFileUpload T="IReadOnlyList<IBrowserFile>" @ref="@_fileUpload"
+                       OnFilesChanged="OnInputFileChanged"
+                       Disabled="@(uiState.IsProcessing || _fileList.Count > 0)"
+                       MaxFileSize="MaxSizeByte" Accept=".pdf" Hidden="@false"
+                       InputClass="absolute mud-width-full mud-height-full overflow-hidden z-10"
+                       InputStyle="opacity:0"
+                       tabindex="-1"
+                       @ondragenter="@SetDragClass" @ondrop="@ClearDragClass"
+                       @ondragleave="@ClearDragClass" @ondragend="@ClearDragClass">
+
+            <ActivatorContent>
+                @if (_fileList.Count == 0)
+                {
+                    <MudPaper Class="@_dragClass" Elevation="0"
+                              Style="
+            border: 2px solid #dee2e6; /* 実線 */
+            border-radius: 8px;
+            padding: 3rem 2rem;
+            text-align: center;
+            background-color: #f8f9fa;
+            margin-bottom: 2rem;
+            cursor: pointer;">
+
+                        <p>PDFファイルをここにドラッグ＆ドロップ</p>
+                        <MudButton StartIcon="@Icons.Material.Filled.AttachFile" class="btn btn-secondary-minimal" style="width: auto;"
+                                   Size="Size.Small" Variant="Variant.Outlined" Color="Color.Info"
+                                   OnClick="@OpenFilePickerAsync">
+                            PDFファイルを選択
+                        </MudButton>
+                        <small class="d-block mt-2">※PDFファイルのみ、@(Settings.MaxUploadFileSizeMB.ToString("0.#"))MB以下のファイルを選択してください</small>
+                    </MudPaper>
+                }
+            </ActivatorContent>
+        </MudFileUpload>
+
+        @if (_fileList.Count > 0)
+        {
+            <MudPaper Class="@_dragClass" Elevation="0"
+                      Style="
+                    border: 2px solid #dee2e6; /* 実線 */
+                    border-radius: 8px;
+                    padding: 3rem 2rem;
+                    text-align: center;
+                    background-color: #f8f9fa;
+                    margin-bottom: 2rem;
+                    cursor: pointer;">
+                @foreach (var file in _fileList)
+                {
+                    <MudItem xs="12" sm="12" md="12">
+                        <MudChip T="string" Color="Color.Success" Variant="Variant.Outlined" Size="Size.Large"
+                                 Text="@(file.Name + "(" + FormatFileSize(file.Size) + ")")" tabindex="-1" />
+                    </MudItem>
+                }
+                <MudButton Color="Color.Error" StartIcon="@Icons.Material.Filled.Clear" Variant="Variant.Outlined"
+                           Size="Size.Small"
+                           OnClick="ClearAsync">
+                    ファイルをクリア
+                </MudButton>
+            </MudPaper>
+        }
+
+        <div class="form-section-minimal">
+            <h2>パスワード設定</h2>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group-minimal">
+                        <label for="viewPassword">閲覧パスワード</label>
+                        <MudTextField @bind-Value="userPassword"
+                                      InputType="InputType.Password"
+                                      Style="width: 100%;font-size: 1rem;border: 1px solid #ced4da;border-radius: 4px;box-sizing: border-box;"
+                                      placeholder="半角英数字"
+                                      Variant="Variant.Outlined" />
+                        <small>PDFを開く際に必要なパスワード</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group-minimal">
+                        <label for="editPassword">編集パスワード</label>
+                        <MudTextField @bind-Value="ownerPassword"
+                                      InputType="InputType.Password"
+                                      Style="width: 100%;font-size: 1rem;border: 1px solid #ced4da;border-radius: 4px;box-sizing: border-box;"
+                                      placeholder="半角英数字"
+                                      Variant="Variant.Outlined" />
+                        <small>PDF編集時に必要なパスワード</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="permission-settings-container">
+            <div class="permission-title-container">
+                <h3>詳細な権限設定</h3>
+                <p>「編集パスワード」を設定した場合に有効になります。許可したい操作をオンにしてください。</p>
+            </div>
+
+            <div class="permission-switches">
+
+                <div class="form-switch-wrapper">
+                    <label class="form-switch-label">印刷</label>
+                    <MudSwitch @bind-value="@permissions.AllowPrinting" Color="Color.Primary" />
+                </div>
+
+                <div class="form-switch-wrapper sub-setting">
+                    <label class="form-switch-label">高品質での印刷</label>
+                    <MudSwitch @bind-value="@permissions.AllowPermitFullQualityPrint" Color="Color.Primary" Disabled="@(!permissions.AllowPrinting)" />
+                </div>
+
+                <div class="form-switch-wrapper">
+                    <label class="form-switch-label">内容のコピー</label>
+                    <MudSwitch @bind-value="@permissions.AllowCopying" Color="Color.Primary" />
+                </div>
+
+                <div class="form-switch-wrapper">
+                    <label class="form-switch-label">文書の変更</label>
+                    <MudSwitch @bind-value="@permissions.AllowDocumentChanges" Color="Color.Primary" />
+                </div>
+
+                <div class="form-switch-wrapper">
+                    <label class="form-switch-label">フォームフィールドの入力</label>
+                    <MudSwitch @bind-value="@permissions.AllowFormFieldFilling" Color="Color.Primary" />
+                </div>
+
+                <div class="form-switch-wrapper">
+                    <label class="form-switch-label">注釈の追加と修正</label>
+                    <MudSwitch @bind-value="@permissions.AllowAnnotationModification" Color="Color.Primary" />
+                </div>
+
+                <div class="form-switch-wrapper">
+                    <label class="form-switch-label">ページの挿入・削除・回転</label>
+                    <MudSwitch @bind-value="@permissions.AllowDocumentAssembly" Color="Color.Primary" />
+                </div>
+
+                <div class="form-switch-wrapper">
+                    <label class="form-switch-label">スクリーンリーダーのためのテキストアクセス</label>
+                    <MudSwitch @bind-value="@permissions.AllowContentExtractionForAccessibility" Color="Color.Primary" />
+                </div>
+            </div>
+        </div>
+
+        <MudButton StartIcon="@Icons.Material.Filled.Download" Size="Size.Large"
+                   Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   OnClick="@Upload"
+                   Disabled="@(_fileList.Count == 0 || (string.IsNullOrWhiteSpace(userPassword) && string.IsNullOrWhiteSpace(ownerPassword)))"
+                   class="btn"
+                   Style="color: #fff;background-color: #0d6efd;border-color: #0d6efd;">
+            保護されたPDFを作成
+        </MudButton>
+
+        
+
+    </div>
+
+</MudContainer>
+
+@code {
+
+    // ファイル関連定数
+    private const string ALLOWED_FILE_TYPE = "application/pdf";
+    private const string ALLOWED_FILE_EXTENSION = ".pdf";
+
+    // ファイル名フォーマット
+    private const string DOWNLOAD_FILENAME_FORMAT = "yyyyMMdd_HHmmss_";
+
+    // エラーメッセージ定数
+    private const string ERROR_FILE_SIZE_EXCEEDED = "ファイルサイズが{0}MBを超えています。{0}MB以下のファイルを選択してください。";
+    private const string ERROR_INVALID_FILE_TYPE = "PDFファイルを選択してください。";
+    private const string ERROR_FILE_SELECTION = "ファイル選択時にエラーが発生しました: {0}";
+    private const string ERROR_UPLOAD_PROCESSING = "パスワード設定処理中にエラーが発生しました: {0}";
+
+    // 処理中メッセージ
+    private const string PROCESSING_MESSAGE = "パスワードを設定しています...";
+
+    // 成功メッセージ
+    private const string SUCCESS_DOWNLOAD = "ダウンロードが完了しました。";
+
+    // UI状態管理用のクラス
+    private class UiState
+    {
+        public bool IsProcessing { get; set; } = false; // 処理中フラグ
+        public string ProcessingMessage { get; set; } = string.Empty; // 処理中メッセージ
+        public string ErrorMessage { get; set; } = string.Empty;      // エラーメッセージ
+        public string SuccessMessage { get; set; } = string.Empty;    // 成功メッセージ
+    }
+
+    private UiState uiState = new UiState();
+
+    private DocumentPermissions permissions = new DocumentPermissions
+    {
+        AllowPrinting = true,
+        AllowPermitFullQualityPrint = true,
+        AllowCopying = true,
+        AllowDocumentChanges = true,
+        AllowFormFieldFilling = true,
+        AllowAnnotationModification = true,
+        AllowDocumentAssembly = true,
+        AllowContentExtractionForAccessibility = true
+    };
+
+    private long MaxSizeByte = 1 * 1024 * 1024;   // 最大ファイルサイズ（バイト単位）
+
+
+    private MudFileUpload<IReadOnlyList<IBrowserFile>>? _fileUpload;
+    private List<IBrowserFile> _fileList = new();
+
+    //private const string DefaultDragClass = "relative rounded-lg border-2 border-dashed pa-4 mt-4 mud-width-full mud-height-full";
+    private const string DefaultDragClass = "";
+    private string _dragClass = DefaultDragClass;
+
+    // パスワード関連のプロパティ
+    private string userPassword = string.Empty;      // 閲覧パスワード
+    private string ownerPassword = string.Empty;     // 編集パスワード
+
+    /// <summary>
+    /// 初期処理
+    /// </summary>
+    protected override void OnInitialized()
+    {
+        // settingsから最大ファイルサイズを取得
+        MaxSizeByte = Convert.ToInt64(Settings.MaxUploadFileSize);
+    }
+
+    // クリア処理
+    private async Task ClearAsync()
+    {
+        await (_fileUpload?.ClearAsync() ?? Task.CompletedTask);
+        _fileList.Clear();
+        // MudPaperの協調表示 End
+        ClearDragClass();
+    }
+
+    // ファイル選択ダイアログを開く非同期メソッド
+    private Task OpenFilePickerAsync()
+    => _fileUpload?.OpenFilePickerAsync() ?? Task.CompletedTask;
+
+    // ファイル選択時の処理
+    private void OnInputFileChanged(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            // MudPaperの協調表示 End
+            ClearDragClass();
+            // 選択されたファイルを取得
+            var files = e.GetMultipleFiles();
+
+            foreach (var file in files)
+            {
+                // ファイルサイズチェック（1MB = 1,048,576 bytes）
+                if (file.Size > MaxSizeByte)
+                {
+                    uiState.ErrorMessage = string.Format(ERROR_FILE_SIZE_EXCEEDED, Settings.MaxUploadFileSizeMB.ToString("0.#"));
+                    return;
+                }
+                // PDFファイル形式チェック
+                if (!file.ContentType.Equals("application/pdf", StringComparison.OrdinalIgnoreCase) &&
+                    !file.Name.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase))
+                {
+                    uiState.ErrorMessage = ERROR_INVALID_FILE_TYPE;
+                    return;
+                }
+                _fileList.Clear();
+                _fileList.Add(file);
+                break;
+            }
+        }
+        catch (Exception ex)
+        {
+            uiState.ErrorMessage = $"{ERROR_FILE_SELECTION}: {ex.Message}";
+        }
+
+    }
+
+    // ファイルアップロードの処理
+    private async Task Upload()
+    {
+        // ファイルが選択されていない、またはパスワードが設定されていない場合は処理を中止
+        if (!IsSelectFile() || !CanSetPassword()) return;
+
+        uiState.IsProcessing = true;
+        // メッセージエリアを初期化
+        uiState.ProcessingMessage = PROCESSING_MESSAGE;
+        ClearMessages();
+        StateHasChanged();
+
+        try
+        {
+            // ファイルをバイト配列として読み込み
+            using var stream = _fileList[0].OpenReadStream(maxAllowedSize: MaxSizeByte);
+            var buffer = new byte[_fileList[0].Size];
+            await stream.ReadAsync(buffer);
+
+            // ★サービスを呼び出す★
+            var returnValue = await PdfPasswordService.AddPasswordToPdfAsync(buffer, userPassword, ownerPassword,permissions);
+            if (!returnValue.Success)
+            {
+                uiState.ErrorMessage = returnValue.Message;
+                return;
+            }
+
+            // 成功した場合の処理
+            var fileName = DateTime.Now.ToString("yyyyMMdd_HHmmss_") + _fileList[0].Name;
+            await DownloadFile(returnValue.PdfFile, fileName);
+            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.TopCenter;
+            Snackbar.Add(SUCCESS_DOWNLOAD);
+
+        }
+        catch (Exception ex)
+        {
+            uiState.ErrorMessage = $"{ERROR_UPLOAD_PROCESSING}: {ex.Message}";
+            return;
+        }
+        finally
+        {
+            // 処理中状態を解除
+            uiState.IsProcessing = false;
+            uiState.ProcessingMessage = string.Empty;
+            StateHasChanged();
+        }
+    }
+
+    /// <summary>
+    /// ファイルダウンロード処理
+    /// </summary>
+    /// <param name="fileBytes">ファイルのバイト配列</param>
+    /// <param name="fileName">ダウンロードファイル名</param>
+    private async Task DownloadFile(byte[] fileBytes, string fileName)
+    {
+        // JavaScriptを使用してファイルダウンロードを実行
+        await JSRuntime.InvokeVoidAsync("downloadFile", Convert.ToBase64String(fileBytes), fileName);
+    }
+
+    private bool IsSelectFile()
+    {
+        // ファイルが選択されているかチェック
+        return _fileList.Count > 0;
+    }
+
+    /// <summary>
+    /// パスワード設定可能かチェック
+    /// </summary>
+    /// <returns>設定可能な場合true</returns>
+    private bool CanSetPassword()
+    {
+        // 閲覧パスワードまたは編集パスワードのいずれかが入力されている場合に設定可能
+        return !string.IsNullOrWhiteSpace(userPassword) || !string.IsNullOrWhiteSpace(ownerPassword);
+    }
+
+    /// <summary>
+    /// メッセージをクリア
+    /// </summary>
+    private void ClearMessages()
+    {
+        uiState.ErrorMessage = string.Empty;
+        uiState.SuccessMessage = string.Empty;
+    }
+
+    /// <summary>
+    /// ファイルサイズ（バイト）を適切な単位（B, KB, MB, GB...）の文字列に変換します。
+    /// </summary>
+    /// <param name="bytes">ファイルサイズ（バイト単位）</param>
+    /// <returns>フォーマットされたファイルサイズの文字列</returns>
+    private string FormatFileSize(long bytes)
+    {
+        if (bytes == 0) return "0 B";
+
+        string[] suffixes = { "B", "KB", "MB", "GB", "TB", "PB" };
+        int i = (int)Math.Floor(Math.Log(bytes, 1024));
+        return $"{bytes / Math.Pow(1024, i):F2} {suffixes[i]}";
+    }
+
+    // MudPaperの協調表示 Begin
+    private void SetDragClass()
+        => _dragClass = $"{DefaultDragClass} mud-border-primary";
+
+    // MudPaperの協調表示 End
+    private void ClearDragClass()
+        => _dragClass = DefaultDragClass;
+
+}
