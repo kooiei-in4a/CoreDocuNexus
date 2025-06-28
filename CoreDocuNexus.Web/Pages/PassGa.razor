@@ -152,42 +152,42 @@
 
                 <div class="form-switch-wrapper">
                     <label class="form-switch-label">印刷</label>
-                    <MudSwitch @bind-value="@permissions.AllowPrinting" Color="Color.Primary" />
+                    <MudSwitch T="bool" @bind-value="@permissions.AllowPrinting" Color="Color.Primary" />
                 </div>
 
                 <div class="form-switch-wrapper sub-setting">
                     <label class="form-switch-label">高品質での印刷</label>
-                    <MudSwitch @bind-value="@permissions.AllowPermitFullQualityPrint" Color="Color.Primary" Disabled="@(!permissions.AllowPrinting)" />
+                    <MudSwitch T="bool" @bind-value="@permissions.AllowPermitFullQualityPrint" Color="Color.Primary" Disabled="@(!permissions.AllowPrinting)" />
                 </div>
 
                 <div class="form-switch-wrapper">
                     <label class="form-switch-label">内容のコピー</label>
-                    <MudSwitch @bind-value="@permissions.AllowCopying" Color="Color.Primary" />
+                    <MudSwitch T="bool" @bind-value="@permissions.AllowCopying" Color="Color.Primary" />
                 </div>
 
                 <div class="form-switch-wrapper">
                     <label class="form-switch-label">文書の変更</label>
-                    <MudSwitch @bind-value="@permissions.AllowDocumentChanges" Color="Color.Primary" />
+                    <MudSwitch T="bool" @bind-value="@permissions.AllowDocumentChanges" Color="Color.Primary" />
                 </div>
 
                 <div class="form-switch-wrapper">
                     <label class="form-switch-label">フォームフィールドの入力</label>
-                    <MudSwitch @bind-value="@permissions.AllowFormFieldFilling" Color="Color.Primary" />
+                    <MudSwitch T="bool" @bind-value="@permissions.AllowFormFieldFilling" Color="Color.Primary" />
                 </div>
 
                 <div class="form-switch-wrapper">
                     <label class="form-switch-label">注釈の追加と修正</label>
-                    <MudSwitch @bind-value="@permissions.AllowAnnotationModification" Color="Color.Primary" />
+                    <MudSwitch T="bool" @bind-value="@permissions.AllowAnnotationModification" Color="Color.Primary" />
                 </div>
 
                 <div class="form-switch-wrapper">
                     <label class="form-switch-label">ページの挿入・削除・回転</label>
-                    <MudSwitch @bind-value="@permissions.AllowDocumentAssembly" Color="Color.Primary" />
+                    <MudSwitch T="bool" @bind-value="@permissions.AllowDocumentAssembly" Color="Color.Primary" />
                 </div>
 
                 <div class="form-switch-wrapper">
                     <label class="form-switch-label">スクリーンリーダーのためのテキストアクセス</label>
-                    <MudSwitch @bind-value="@permissions.AllowContentExtractionForAccessibility" Color="Color.Primary" />
+                    <MudSwitch T="bool" @bind-value="@permissions.AllowContentExtractionForAccessibility" Color="Color.Primary" />
                 </div>
             </div>
         </div>
