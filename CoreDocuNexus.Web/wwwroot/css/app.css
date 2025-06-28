@@ -112,3 +112,51 @@ code {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+
+/* --- フッター --- */
+/* フッター全体 */
+.corporate-footer {
+    padding: 1.5rem 0; /* 上下の余白 */
+    background-color: #f8f9fa; /* 背景色 */
+    color: #6c757d; /* 文字色 */
+    font-size: 0.9rem; /* 文字サイズ */
+    border-top: 1px solid #e9ecef; /* 上部に細い境界線を入れてコンテンツと分離 */
+}
+
+    /* フッター内のコンテンツを囲むコンテナ */
+    .corporate-footer .footer-container {
+        max-width: 1140px; /* コンテンツの最大幅を指定 */
+        margin: 0 auto; /* 中央寄せ */
+        padding: 0 1rem; /* 左右の余白 */
+        display: flex; /* Flexboxを有効化 */
+        flex-direction: column; /* デフォルトは縦並び（スマホ用） */
+        align-items: center; /* 中央揃え */
+    }
+
+    /* リンクとコピーライトの間の余白 */
+    .corporate-footer .footer-links {
+        margin-bottom: 0.5rem;
+    }
+
+        /* リンクのスタイル */
+        .corporate-footer .footer-links a {
+            color: #495057;
+            text-decoration: none;
+        }
+
+            .corporate-footer .footer-links a:hover {
+                text-decoration: underline;
+            }
+
+/* 画面幅が768px以上の場合（タブレット・PC） */
+@media (min-width: 768px) {
+    .corporate-footer .footer-container {
+        flex-direction: row; /* 横並びに変更 */
+        justify-content: space-between; /* 両端に配置 */
+    }
+
+    .corporate-footer .footer-links {
+        margin-bottom: 0; /* 横並びになるので下の余白をリセット */
+    }
+}

@@ -48,10 +48,9 @@
         </MudOverlay>
 
         <div class="passga-header">
-            <h1>PassGa PDF</h1>
-            <p>「パスッと設定、ガシッとガード」をコンセプトに、PDFのパスワード管理をシンプルにします。</p>
+            <h1>@(Settings.AppName)</h1>
+            <p>@(Settings.AppDescription)</p>
         </div>
-
 
         <MudFileUpload T="IReadOnlyList<IBrowserFile>" @ref="@_fileUpload"
                        OnFilesChanged="OnInputFileChanged"

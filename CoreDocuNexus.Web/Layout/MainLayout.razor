@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@inject jp.in4a.CoreDocuNexus.Web.AppSettings.RootSettings Settings
 
 <MudThemeProvider />
 <MudDialogProvider />
@@ -6,3 +7,27 @@
 <MudPopoverProvider />
 
 @Body
+
+<footer class="corporate-footer">
+    <div class="footer-container">
+        <div class="footer-links">
+            <a href="https://in4a.jp/">https://in4a.jp/</a>
+        </div>
+        <div class="copyright">
+            &copy; 2025 IN4A.LLC. All Rights Reserved.
+        </div>
+@if(Settings.IsDevelopment)
+{
+        <div class="development-info">
+                <span>EnvironmentName:[@(Settings.EnvironmentName)]</span>
+                <span>MaxUploadFileSize(MB)[@(Settings.MaxUploadFileSizeMB)]</span>
+                <span>ApiBaseUrl[@(Settings.ApiBaseUrl)]</span>
+                <span>ApiKey[@(Settings.ApiKey)]</span>               
+        </div>
+}
+    </div>
+</footer>
+
+@code{
+    private string EnvironmentName => Settings.EnvironmentName;
+}
