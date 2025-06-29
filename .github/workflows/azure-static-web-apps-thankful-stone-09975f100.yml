@@ -42,6 +42,7 @@ jobs:
           api_location: "Api" # Api source code path - optional
           output_location: "wwwroot" # Built app content directory - optional
           github_id_token: ${{ steps.idtoken.outputs.result }}
+          deployment_environment: 'staging'
         env:
           DOTNET_ENVIRONMENT: 'Staging'
 
