@@ -53,10 +53,10 @@ jobs:
           action: "upload"
           app_location: "./CoreDocuNexus.Web" # App source code path
           api_location: "Api" # Api source code path - optional
-          # output_location: "wwwroot" # Built app content directory - optional
+          output_location: "wwwroot" # Built app content directory - optional
           github_id_token: ${{ steps.idtoken.outputs.result }}
           app_build_command: "dotnet publish -c Release -p:Environment=${{ env.DOTNET_ENVIRONMENT_NAME }} -o output"
-          output_location: "output/wwwroot"
+          # output_location: "output/wwwroot"
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
