@@ -13,8 +13,8 @@ on:
     - develop
 env:
   AZURE_STATIC_WEBAPP_NAME: CoreDocuNexus-Testing
-  APP_DIRECTORY: CoreDocuNexus
-  API_DIRECTORY: CoreDocuNexus
+  APP_DIRECTORY: "."
+  API_DIRECTORY: "Api"
   OUTPUT: wwwroot
   DEPLOYMENT_ENVIRONMENT: preview
 jobs:
