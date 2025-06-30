@@ -1,7 +1,9 @@
 ﻿using jp.in4a.CoreDocuNexus.Contracts.Http.AddPasswordToPdf;
 using jp.in4a.CoreDocuNexus.Shared.Dto.Pdf;
+using jp.in4a.CoreDocuNexus.Web.AppSettings;
 using Microsoft.VisualBasic;
 using System.Net.Http.Json;
+using System.Runtime;
 using System.Text;
 using System.Text.Json;
 
@@ -16,13 +18,14 @@ namespace jp.in4a.CoreDocuNexus.Web.Services
             public bool Success { get; set; }
         }
 
-
+        private readonly RootSettings _settings;
         private readonly HttpClient _httpClient;
         private const string AddPasswordEndpoint = "api/AddPasswordToPdf"; // マジックストリングを定数化
 
-        public PdfPasswordService(HttpClient httpClient)
+        public PdfPasswordService(HttpClient httpClient,RootSettings settings)
         {
             _httpClient = httpClient;
+            _settings = settings;
         }
 
         public async Task<ReturnValue> AddPasswordToPdfAsync(byte[] pdfFile, string userPassword, string ownerPassword,DocumentPermissions permissions)
@@ -37,9 +40,13 @@ namespace jp.in4a.CoreDocuNexus.Web.Services
             };
 
             var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
-
+            var endPointUrl = AddPasswordEndpoint;
+            if (_settings.IsProduction || _settings.IsStaging)
+            {
+                endPointUrl += $"?code=fpfruICygcFnLUTOo-" + "CGGHMTb1tuhf87ePD_vTjpo7KFAzFu89jQEg==";
+            }
             // API呼び出しとレスポンス検証ロジックをここに移動
-            var response = await _httpClient.PostAsync(AddPasswordEndpoint, content);
+            var response = await _httpClient.PostAsync(endPointUrl, content);
 
             // 成功しなかった場合は例外を投げる
             if (!response.IsSuccessStatusCode)
