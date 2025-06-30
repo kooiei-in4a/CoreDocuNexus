@@ -20,7 +20,7 @@ public class AddPasswordToPdf
     }
 
     [Function("AddPasswordToPdf")]
-    public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Anonymous, "post")] HttpRequest req)
+    public async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
     {
         _logger.LogInformation("AddPasswordToPdf function started processing request.");
 

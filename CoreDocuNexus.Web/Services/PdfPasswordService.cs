@@ -20,7 +20,7 @@ namespace jp.in4a.CoreDocuNexus.Web.Services
 
         private readonly RootSettings _settings;
         private readonly HttpClient _httpClient;
-        private const string AddPasswordEndpoint = "api/AddPasswordToPdf"; // マジックストリングを定数化
+        private const string AddPasswordEndpoint = "api/AddPasswordToPdf"; 
 
         public PdfPasswordService(HttpClient httpClient,RootSettings settings)
         {
@@ -43,6 +43,7 @@ namespace jp.in4a.CoreDocuNexus.Web.Services
             var endPointUrl = AddPasswordEndpoint;
             if (_settings.IsProduction || _settings.IsStaging)
             {
+                // あくまでもAzure Functionを直接実行されないようにしているだけ
                 endPointUrl += $"?code=fpfruICygcFnLUTOo-" + "CGGHMTb1tuhf87ePD_vTjpo7KFAzFu89jQEg==";
             }
             // API呼び出しとレスポンス検証ロジックをここに移動
