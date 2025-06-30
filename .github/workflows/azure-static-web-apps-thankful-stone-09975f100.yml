@@ -22,19 +22,6 @@ jobs:
         with:
           submodules: true
           lfs: false
-
-      # ブランチ名に応じて環境名を決定するステップ
-      - name: Set Environment Name
-        id: set_env
-        run: |
-          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            echo "DOTNET_ENVIRONMENT_NAME=Production" >> $GITHUB_ENV
-          elif [ "${{ github.ref }}" = "refs/heads/develop" ]; then
-            echo "DOTNET_ENVIRONMENT_NAME=Staging" >> $GITHUB_ENV
-          else
-            echo "DOTNET_ENVIRONMENT_NAME=Development" >> $GITHUB_ENV
-          fi
-
       - name: Install OIDC Client from Core Package
         run: npm install @actions/core@1.6.0 @actions/http-client
       - name: Get Id Token
@@ -51,12 +38,13 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_THANKFUL_STONE_09975F100 }}
           action: "upload"
+          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
+          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
           app_location: "./CoreDocuNexus.Web" # App source code path
           api_location: "Api" # Api source code path - optional
           output_location: "wwwroot" # Built app content directory - optional
           github_id_token: ${{ steps.idtoken.outputs.result }}
-          app_build_command: "dotnet publish -c Release -p:Environment=${{ env.DOTNET_ENVIRONMENT_NAME }} -o output"
-          # output_location: "output/wwwroot"
+          ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
